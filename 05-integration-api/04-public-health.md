@@ -266,7 +266,290 @@ OBX|1|CE|64994-7^Funding eligibility^LN||
 
 ---
 
-## 7. COVID-19 — Case Study Public Health IT
+## 7. FHIR-based ELR — Hướng đi hiện đại
+
+CDC và ONC đang đẩy các bang chuyển sang **FHIR-based ELR** thay vì HL7 v2.
+
+### So sánh HL7 v2 vs FHIR ELR
+
+| Khía cạnh | HL7 v2.5.1 ELR | FHIR R4 ELR |
+|-----------|---------------|------------|
+| Format | Pipe-delimited text | JSON/XML |
+| Transport | MLLP / SOAP | REST HTTPS |
+| Validation | Manual / limited | Automatic schema + terminology |
+| Implementation | Complex, need HL7 expertise | Easier, standard REST |
+| Adoption | Legacy — still majority | Growing — mandated for new |
+| Test | Hard to test locally | Sandbox servers available |
+
+### FHIR ELR Bundle Structure
+
+```json
+POST /Bundle
+
+{
+  "resourceType": "Bundle",
+  "type": "message",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "MessageHeader",
+        "eventCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0003",
+          "code": "R01",
+          "display": "ORU/ACK - Unsolicited transmission of an observation"
+        },
+        "destination": [{
+          "name": "State Health Department LIMS",
+          "endpoint": "https://statehd.example.gov/fhir"
+        }],
+        "sender": {
+          "reference": "Organization/hospital-a"
+        },
+        "focus": [{"reference": "DiagnosticReport/elr-001"}]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "elr-001",
+        "status": "final",
+        "category": [{
+          "coding": [{"system": "http://loinc.org", "code": "LAB"}]
+        }],
+        "code": {
+          "coding": [{
+            "system": "http://loinc.org",
+            "code": "31777-2",
+            "display": "Chlamydia trachomatis DNA [Presence] Genital"
+          }]
+        },
+        "subject": {"reference": "Patient/patient-001"},
+        "result": [{"reference": "Observation/obs-001"}]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-001",
+        "status": "final",
+        "code": {
+          "coding": [{"system": "http://loinc.org", "code": "31777-2"}]
+        },
+        "valueCodeableConcept": {
+          "coding": [{
+            "system": "http://snomed.info/sct",
+            "code": "10828004",
+            "display": "Positive"
+          }]
+        },
+        "performer": [{"reference": "Organization/lab-a"}]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 8. Electronic Death Registration System (EDRS)
+
+### Tại sao quan trọng với IT?
+
+Death certificates là nguồn dữ liệu quan trọng cho:
+- Mortality surveillance (nguyên nhân tử vong dân số)
+- COVID-19 death tracking
+- Opioid overdose monitoring
+- Cancer mortality rates
+
+### Quy trình (truyền thống vs điện tử)
+
+```
+Truyền thống (vẫn còn phổ biến):
+  Bác sĩ viết giấy → Funeral home → Vital records office → nhập máy thủ công
+  → Lag: 2-4 tuần
+
+Điện tử (EDRS):
+  Bác sĩ ký điện tử trong EHR/EDRS portal
+       ↓
+  Funeral home điền thông tin tang lễ
+       ↓
+  Vital records office xác nhận
+       ↓
+  Auto-feed vào CDC NVSS (National Vital Statistics System)
+  → Lag: 24-72 giờ
+```
+
+### IT Integration với EHR
+
+```python
+# Trigger death certificate workflow khi patient status = deceased
+def handle_patient_death(patient_id: str, death_datetime: str, attending_physician_npi: str):
+    # Update FHIR Patient resource
+    patch_patient_deceased(patient_id, death_datetime)
+    
+    # Notify EDRS system
+    edrs_case = create_edrs_case(
+        patient_id=patient_id,
+        death_datetime=death_datetime,
+        facility_id=current_facility_id,
+        attending_npi=attending_physician_npi
+    )
+    
+    # Pre-populate death certificate với data từ EHR
+    prefill_data = {
+        'diagnoses': get_active_conditions(patient_id),
+        'last_admission': get_last_encounter(patient_id),
+        'demographics': get_patient_demographics(patient_id)
+    }
+    
+    send_to_edrs(edrs_case, prefill_data)
+    
+    # Notify family, billing, organ donation coordinator
+    trigger_downstream_workflows(patient_id, 'DECEASED')
+```
+
+---
+
+## 9. Social Determinants of Health (SDoH)
+
+### SDoH là gì?
+
+> **"Zip code predicts health outcomes better than genetic code."**
+
+SDoH = điều kiện sống ảnh hưởng đến sức khỏe: thu nhập, nhà ở, thực phẩm, giáo dục, môi trường.
+
+| Domain | Ví dụ SDoH | Impact lên sức khỏe |
+|--------|-----------|---------------------|
+| **Economic stability** | Thất nghiệp, nghèo, nợ nần | Stress, không mua được thuốc |
+| **Food** | Food insecurity, "food desert" | Malnutrition, diabetes khó kiểm soát |
+| **Housing** | Vô gia cư, nhà không an toàn | Respiratory disease, injury |
+| **Transportation** | Không có xe, xa bệnh viện | No-show appointments, late diagnosis |
+| **Education** | Literacy thấp | Không hiểu hướng dẫn thuốc |
+| **Social isolation** | Sống một mình, không có support | Depression, CHF rehospitalization |
+
+### SDoH Screening trong EHR
+
+**FHIR Resources cho SDoH:**
+- `Observation` — kết quả screening (food insecurity = yes/no)
+- `Condition` — SDoH diagnosis (Z codes trong ICD-10)
+- `ServiceRequest` — referral đến community resources
+- `Task` — follow up với patient về SDoH needs
+
+**ICD-10 Z codes cho SDoH:**
+```
+Z59.0  = Homelessness
+Z59.4  = Lack of adequate food
+Z59.1  = Inadequate housing
+Z60.4  = Social exclusion and rejection
+Z63.0  = Problems in relationship with spouse/partner
+Z56.0  = Unemployment
+Z72.3  = Lack of physical exercise
+```
+
+### FHIR Gravity Project — SDoH Standard
+
+```json
+// FHIR Observation: Food Insecurity Screening Result
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "category": [{
+    "coding": [{
+      "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes",
+      "code": "sdoh-category-unspecified"
+    }]
+  }],
+  "code": {
+    "coding": [{
+      "system": "http://loinc.org",
+      "code": "88122-7",
+      "display": "Within the past 12 months we worried whether our food would run out before we got money to buy more"
+    }]
+  },
+  "subject": {"reference": "Patient/123"},
+  "valueCodeableConcept": {
+    "coding": [{
+      "system": "http://loinc.org",
+      "code": "LA28397-0",
+      "display": "Often true"
+    }]
+  }
+}
+```
+
+### Closed-Loop Referral — SDoH Workflow
+
+```
+EHR Screen (FHIR Observation)
+       ↓
+Identify Need (food insecurity, housing)
+       ↓
+Generate Referral (FHIR ServiceRequest)
+       ↓
+Community Resource Platform (e.g., findhelp.org, Unite Us, 211)
+  - Food bank
+  - Housing assistance  
+  - Transportation
+       ↓
+Outcome Feedback (FHIR Task updated)
+  → "Referral completed", "Client enrolled", "Need met"
+       ↓
+Track SDoH outcomes in population health dashboard
+```
+
+---
+
+## 10. Public Health Emergency Response (PHEP)
+
+### Medical Surge — IT phải hỗ trợ
+
+Khi có disaster (pandemic, mass casualty event):
+
+| Challenge | IT Solution |
+|-----------|------------|
+| Bed capacity unknown | Real-time bed census feed đến EOC |
+| Resource allocation | Ventilator, PPE inventory tracking system |
+| Patient tracking | S.T.A.R.T triage tagging + barcode scan |
+| Surge staffing | Credential verification system (rapid onboarding) |
+| Communication | Mass notification (providers + patients) |
+| Supply chain | PPE/medication demand forecasting |
+
+### HAvBED — Hospital Bed Availability Reporting
+
+Bệnh viện report bed availability đến state trong emergencies:
+
+```json
+// FHIR-based bed availability (emerging standard)
+{
+  "resourceType": "Location",
+  "status": "active",
+  "operationalStatus": {
+    "coding": [{"system": "http://terminology.hl7.org/CodeSystem/v2-0116",
+                "code": "O", "display": "Occupied"}]
+  },
+  "physicalType": {
+    "coding": [{"system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+                "code": "bd", "display": "Bed"}]
+  },
+  "extension": [{
+    "url": "http://hl7.org/fhir/StructureDefinition/location-boundary-geojson",
+    "valueAttachment": { "contentType": "application/geo+json" }
+  }]
+}
+```
+
+### 1135 Waiver — COVID-19 Emergency Rules
+
+Trong COVID-19, CMS issued **1135 Waivers** cho phép:
+- Telehealth thanh toán Medicare như in-person
+- Prescribing opioids qua telehealth (không cần gặp trực tiếp)
+- Out-of-state providers practice across state lines
+
+**IT impact:** EHR phải support mode "telehealth encounter = billable" nhanh chóng.
+
+---
+
+## 11. COVID-19 — Case Study Public Health IT
 
 COVID-19 cho thấy infrastructure public health còn yếu:
 
@@ -282,11 +565,33 @@ COVID-19 cho thấy infrastructure public health còn yếu:
 
 ## ✅ Checklist sau chương này
 
-- [ ] Tôi biết 3 loại timing cho disease reporting (Immediate/Urgent/Standard)
-- [ ] Tôi biết ELR dùng HL7 v2.5.1 với LOINC bắt buộc cho test codes
+**Nền tảng:**
+- [ ] Tôi biết 6 hoạt động chính của Public Health Informatics và IT system tương ứng
+- [ ] Tôi biết 4 loại timing cho disease reporting (Immediate / Urgent / Standard / Aggregated)
+
+**ELR:**
+- [ ] Tôi biết ELR dùng HL7 v2.5.1 với LOINC bắt buộc cho test codes và SNOMED cho organisms
+- [ ] Tôi biết FHIR-based ELR khác HL7 v2 ELR thế nào và xu hướng chuyển đổi
+- [ ] Tôi có thể đọc và giải thích cấu trúc FHIR Bundle cho ELR
+
+**Syndromic Surveillance:**
 - [ ] Tôi biết Syndromic Surveillance dùng chief complaints — không cần lab confirm
+- [ ] Tôi biết ít nhất 4 syndrome categories (ILI, GI, Respiratory, Rash)
+- [ ] Tôi biết BioSense nhận data từ ~60M ED visits/năm với latency <24h
+
+**IIS & Vaccinations:**
 - [ ] Tôi biết CVX codes là gì và ít nhất 5 CVX codes phổ biến
 - [ ] Tôi biết VXU (submit) vs QBP (query) trong IIS workflows
-- [ ] Tôi biết NHSN là gì và 5 HAI metrics phải report
+- [ ] Tôi biết VFC program và cách EHR phải track eligibility
+
+**HAI & NHSN:**
+- [ ] Tôi biết NHSN là gì và 6 HAI metrics phải report hàng tháng
+- [ ] Tôi biết NHSN dùng CDA format để submit
+
+**Nâng cao:**
+- [ ] Tôi hiểu EDRS là gì và tại sao lag reporting là vấn đề
+- [ ] Tôi biết SDoH là gì và ICD-10 Z codes dùng để mã hóa
+- [ ] Tôi biết FHIR Gravity Project chuẩn hóa SDoH data
+- [ ] Tôi biết Closed-Loop Referral workflow cho SDoH
 
 **Tiếp theo:** `06-analytics-ml/01-analytics-co-ban.md` →
