@@ -1,0 +1,47 @@
+.table-head {
+    @apply px-6 py-4 text-left text-sm font-semibold text-slate-600;
+}
+
+.table-cell {
+    @apply px-6 py-4 text-sm;
+}
+
+.metric-card {
+    @apply bg-white rounded-2xl shadow-sm p-6;
+}
+
+.metric-title {
+    @apply text-sm text-slate-500;
+}
+
+.metric-value {
+    @apply text-3xl font-bold mt-2;
+}
+
+.form-textarea {
+    @apply w-full rounded-xl border border-slate-300 px-4 py-3;
+}
+
+.btn-secondary {
+    @apply bg-slate-200 hover:bg-slate-300
+           px-5 py-3 rounded-xl;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700
+           text-white px-5 py-3 rounded-xl;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700
+           text-white px-5 py-3 rounded-xl;
+}
+
+.order-type-btn {
+    @apply border rounded-xl px-4 py-4
+           hover:bg-slate-100;
+}
+
+.vital-row {
+    @apply flex justify-between border-b pb-2;
+}

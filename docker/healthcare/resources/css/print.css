@@ -1,0 +1,17 @@
+@media print {
+
+    .sidebar,
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    .print-break {
+        page-break-after: always;
+    }
+}

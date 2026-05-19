@@ -1,0 +1,17 @@
+.high-contrast body {
+    background: black;
+    color: white;
+}
+
+.high-contrast .bg-white {
+    background: #111827 !important;
+}
+
+.large-font body {
+    font-size: 18px;
+}
+
+.reduce-motion * {
+    animation: none !important;
+    transition: none !important;
+}
