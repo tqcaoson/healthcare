@@ -8,12 +8,13 @@ Frontend cho hệ thống y tế Laravel, xây dựng với **Alpine.js + Blade 
 
 ## Tech Stack Frontend
 
-```
+```text
 Web Interface:      Blade templates + Alpine.js + Tailwind CSS
 Mobile:             React Native / React (responsive)
 State Management:   Alpine store / React hooks
 UI Framework:       Tailwind CSS 3.x + custom component library
 Real-time Updates:  Laravel Echo + WebSocket (Pusher / Redis)
+Video/WebRTC:       Native WebRTC / Twilio (Telehealth video)
 HTTP Client:        Axios + custom interceptors for JWT
 Forms:              Laravel Livewire (dynamic forms) + custom validation
 Charts/Reports:     Chart.js, ECharts, Recharts (React)
@@ -24,7 +25,7 @@ Accessibility:      WCAG 2.1 AA compliance
 
 ## Kiến trúc Components
 
-```
+```text
 frontend/
 ├── resources/
 │   ├── views/                           # Blade templates
@@ -80,10 +81,14 @@ frontend/
 │   │   │   └── drug-interaction-check.blade.php
 │   │   │
 │   │   ├── clinical/
-│   │   │   ├── notes.blade.php
+│   │   │   ├── notes.blade.php         # Rich text clinical documentation
 │   │   │   ├── allergies.blade.php
-│   │   │   ├── conditions.blade.php
+│   │   │   ├── conditions.blade.php    # Problem list (ICD-10/SNOMED)
 │   │   │   └── procedures.blade.php
+│   │   │
+│   │   ├── telehealth/
+│   │   │   ├── waiting-room.blade.php  # Telehealth waiting room
+│   │   │   └── session.blade.php       # WebRTC video interface
 │   │   │
 │   │   ├── appointments/
 │   │   │   ├── calendar.blade.php
@@ -105,7 +110,7 @@ frontend/
 │   │   │   ├── users.blade.php
 │   │   │   ├── audit-log.blade.php
 │   │   │   ├── system-health.blade.php
-│   │   │   └── integrations.blade.php
+│   │   │   └── interoperability.blade.php # Terminology mapping & FHIR
 │   │   │
 │   │   └── components/
 │   │       ├── patient-banner.blade.php
@@ -113,7 +118,7 @@ frontend/
 │   │       ├── allergy-alert.blade.php
 │   │       ├── order-summary.blade.php
 │   │       ├── result-viewer.blade.php
-│   │       └── timeline.blade.php
+│   │       └── notification-inbox.blade.php # Critical alert tray
 │   │
 │   ├── js/
 │   │   ├── app.js                      # Main entry point
@@ -127,6 +132,7 @@ frontend/
 │   │   │   ├── useEncounter.js
 │   │   │   ├── useOrders.js
 │   │   │   ├── useResults.js
+│   │   │   ├── useTelehealth.js        # WebRTC session handler
 │   │   │   └── useNotifications.js
 │   │   ├── services/
 │   │   │   ├── api.js                  # Axios instance + interceptors
@@ -175,7 +181,7 @@ frontend/
 
 ### 1. Authentication Flow
 
-```
+```text
 ┌─────────────────────┐
 │    Login Page       │
 │  - Email/Username   │
@@ -207,13 +213,13 @@ frontend/
 
 ### 2. Patient Search & Selection
 
-```
+```text
 ┌──────────────────────────────────┐
 │  PATIENT SEARCH                  │
 │                                  │
 │  Search: [John Doe____________]  │
 │  MRN    [10234567_____________]  │
-│  DOB    [01/01/1980____________]  │
+│  DOB    [01/01/1980____________] │
 │                                  │
 │  [x] Advanced Search             │
 │                                  │
@@ -223,13 +229,13 @@ frontend/
 ┌──────────────────────────────────┐
 │  RESULTS (Meilisearch powered)   │
 │                                  │
-│  ✓ John SMITH (MRN: 10234567)   │
-│    DOB: 01/01/1980 (44yo, M)    │
+│  ✓ John SMITH (MRN: 10234567)    │
+│    DOB: 01/01/1980 (44yo, M)     │
 │    Active encounters: 2          │
-│    Last visit: 2025-05-15       │
+│    Last visit: 2025-05-15        │
 │                                  │
-│  ✓ John Smyth (MRN: 10234568)   │
-│    DOB: 15/06/1975              │
+│  ✓ John Smyth (MRN: 10234568)    │
+│    DOB: 15/06/1975               │
 │    [DUPLICATE ALERT]             │
 │                                  │
 └──────────────────────────────────┘
@@ -238,12 +244,12 @@ frontend/
 ┌──────────────────────────────────┐
 │  PATIENT BANNER (Sticky top)     │
 │  ┌──────────────────────────────┐│
-│  │ [Photo] John SMITH            ││
+│  │ [Photo] John SMITH           ││
 │  │ MRN: 10234567 | DOB: 01/01/80││
 │  │ 📍 44y/M | Blood: O+ | ⚠ 5 pts││
-│  │                               ││
-│  │ ⚠ NKDA (Penicillin)           ││
-│  │ ACTIVE: Hypertension, DM2     ││
+│  │                              ││
+│  │ ⚠ NKDA (Penicillin)          ││
+│  │ ACTIVE: Hypertension, DM2    ││
 │  └──────────────────────────────┘│
 └──────────────────────────────────┘
 ```
@@ -259,20 +265,20 @@ frontend/
 
 ### 3. Patient Chart / EHR
 
-```
+```text
 ┌────────────────────────────────────────────────────┐
-│                  PATIENT CHART                      │
+│                  PATIENT CHART                     │
 │  [Timeline] [Vitals] [Labs] [Imaging] [Meds] [All] │
 └────────────────────────────────────────────────────┘
 
 ╔════════════════════════════════════════════════════╗
-║           TODAY's ENCOUNTER (In Progress)          ║
-║  2025-05-19 | Ward: 4B | Bed: 401                 ║
+║           TODAY'S ENCOUNTER (In Progress)          ║
+║  2025-05-19 | Ward: 4B | Bed: 401                  ║
 ║  Chief Complaint: Chest pain                       ║
 ║  Temperature: 37.2°C | BP: 145/92 (↑)              ║
 ║  HR: 88 | RR: 18 | O₂: 98%                         ║
 ║                                                    ║
-║  🔴 CRITICAL ALERT: ECG ordered, await result     ║
+║  🔴 CRITICAL ALERT: ECG ordered, await result      ║
 ╚════════════════════════════════════════════════════╝
 
 Timeline View (Vertical scroll):
@@ -309,7 +315,7 @@ Compact Cards for each event:
 
 ### 4. Vital Signs Entry (Nurse)
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  VITAL SIGNS ENTRY                      │
 │  Patient: John SMITH | Time: 09:30 AM   │
@@ -325,7 +331,7 @@ Blood Pressure (mmHg)
 ┌──────────────────────┐
 │  Systolic:  [145] ⚠  │  High
 │  Diastolic: [92]  ⚠  │  High
-│  Status: Abnormal     │
+│  Status: Abnormal    │
 └──────────────────────┘
 
 Heart Rate (bpm)
@@ -356,11 +362,11 @@ Oxygen Saturation (%)
 
 ### 5. Computerized Provider Order Entry (CPOE)
 
-```
+```text
 ┌──────────────────────────────────────┐
 │  PLACE NEW ORDER                     │
 │  Patient: John SMITH (MRN: 10234567) │
-└──────────────────────────────────────┘
+└──────────────────────────────────────┐
 
 Order Type:
 [🧬 Lab]  [🏥 Radiology]  [💊 Medication]  [🔬 Other]
@@ -372,10 +378,10 @@ Search: [CBC, CMP, Troponin______]
 │ ✓ Complete Blood Count (CBC)         │
 │   Category: Hematology               │
 │   Reference range:                   │
-│   - WBC: 4.5-11.0 K/μL              │
-│   - RBC: 4.5-5.9 M/μL               │
-│   - Hemoglobin: 13.5-17.5 g/dL      │
-│   ⓘ Last: 2025-05-15                │
+│   - WBC: 4.5-11.0 K/μL               │
+│   - RBC: 4.5-5.9 M/μL                │
+│   - Hemoglobin: 13.5-17.5 g/dL       │
+│   ⓘ Last: 2025-05-15                 │
 │                                      │
 │   [Select]                           │
 └──────────────────────────────────────┘
@@ -395,7 +401,7 @@ Special Instructions: [Keep refrigerated___]
 After submission:
 ┌──────────────────────────────────────┐
 │  ✓ Order Placed                      │
-│  Order #: OD-2025-0123456           │
+│  Order #: OD-2025-0123456            │
 │  Status: Pending                     │
 │  Sent to: LIS                        │
 │  ETA: 30 minutes                     │
@@ -416,7 +422,7 @@ After submission:
 
 ### 6. Results Viewer
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │  RESULTS VIEWER                          │
 │  Patient: John SMITH                     │
@@ -438,12 +444,12 @@ COMPLETED RESULTS:
 │    Resulted: 2025-05-19 08:45            │
 │    Status: Reviewed by Dr. Johnson       │
 │                                          │
-│    WBC          8.5 K/μL    ✓ Normal    │
-│    RBC          4.8 M/μL    ✓ Normal    │
-│    Hemoglobin   14.2 g/dL   ✓ Normal    │
-│    Platelets    245 K/μL    ✓ Normal    │
+│    WBC          8.5 K/μL    ✓ Normal     │
+│    RBC          4.8 M/μL    ✓ Normal     │
+│    Hemoglobin   14.2 g/dL   ✓ Normal     │
+│    Platelets    245 K/μL    ✓ Normal     │
 │                                          │
-│    [View Details] [Add to Summary]      │
+│    [View Details] [Add to Summary]       │
 └──────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────┐
@@ -451,27 +457,27 @@ COMPLETED RESULTS:
 │    Resulted: 2025-05-18 14:20            │
 │    Status: UNREVIEWED                    │
 │                                          │
-│    Glucose      145 mg/dL   ⚠ HIGH      │
-│    Creatinine   1.2 mg/dL   ✓ Normal    │
-│    BUN          18 mg/dL    ✓ Normal    │
-│    Potassium    3.8 mEq/L   ✓ Normal    │
+│    Glucose      145 mg/dL   ⚠ HIGH       │
+│    Creatinine   1.2 mg/dL   ✓ Normal     │
+│    BUN          18 mg/dL    ✓ Normal     │
+│    Potassium    3.8 mEq/L   ✓ Normal     │
 │                                          │
-│    ⓘ Abnormal results highlighted       │
-│    [Notify Clinician] [Acknowledge]     │
+│    ⓘ Abnormal results highlighted        │
+│    [Notify Clinician] [Acknowledge]      │
 └──────────────────────────────────────────┘
 
 IMAGING RESULTS:
 ┌──────────────────────────────────────────┐
 │ ✅ Chest X-Ray (PA & Lateral)            │
 │    Resulted: 2025-05-17 11:30            │
-│    Interpreted by: Dr. Sarah Chen (Radiology)
+│    Interpreted by: Dr. Sarah Chen (Radiology)│
 │                                          │
 │    FINDINGS: No acute cardiopulmonary    │
 │    process. Heart size normal. No focal  │
 │    consolidation. Osseous structures     │
 │    intact.                               │
 │                                          │
-│    [View Images] [View Report] [Compare]│
+│    [View Images] [View Report] [Compare] │
 └──────────────────────────────────────────┘
 ```
 
@@ -488,11 +494,11 @@ IMAGING RESULTS:
 
 ### 7. Medication Administration Record (MAR)
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │  MEDICATION ADMINISTRATION RECORD (MAR)     │
-│  Patient: John SMITH | Ward: 4B, Bed: 401  │
-│  Date: 2025-05-19                          │
+│  Patient: John SMITH | Ward: 4B, Bed: 401   │
+│  Date: 2025-05-19                           │
 └─────────────────────────────────────────────┘
 
 SCHEDULED MEDICATIONS:
@@ -502,17 +508,17 @@ SCHEDULED MEDICATIONS:
 │ Frequency: BID (twice daily)                │
 │ Indication: Hypertension                    │
 │ Dose: 50 mg                                 │
-│ Duration: 2025-05-19 to 2025-06-19        │
+│ Duration: 2025-05-19 to 2025-06-19          │
 │                                             │
-│ Times:  [06:00]  [18:00]                   │
+│ Times:  [06:00]  [18:00]                    │
 │ ─────────────────────────────────────────   │
-│ 06:00   ✓ Given (Nurse: Kim Johnson)       │
-│ Time:   06:05                              │
-│ Barcode verified                           │
-│ [View Details]                             │
+│ 06:00   ✓ Given (Nurse: Kim Johnson)        │
+│ Time:   06:05                               │
+│ Barcode verified                            │
+│ [View Details]                              │
 │                                             │
-│ 18:00   ⏳ Due in 2 hours                   │
-│ [Mark as Given] [Hold] [Refuse]            │
+│ 18:00   ⏳ Due in 2 hours                    │
+│ [Mark as Given] [Hold] [Refuse]             │
 └─────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
@@ -523,7 +529,7 @@ SCHEDULED MEDICATIONS:
 │           (Urticaria documented)            │
 │                                             │
 │ Status: [⛔ HOLD - ALLERGY]                 │
-│ [Acknowledge & Verify] [Dismiss]           │
+│ [Acknowledge & Verify] [Dismiss]            │
 └─────────────────────────────────────────────┘
 
 PRN (As-needed) MEDICATIONS:
@@ -534,17 +540,17 @@ PRN (As-needed) MEDICATIONS:
 │ Frequency: Q6H as needed                    │
 │                                             │
 │ History:                                    │
-│ 2025-05-19 08:30 ✓ Given (1000 mg total)   │
-│ 2025-05-19 02:15 ✓ Given (500 mg)          │
-│ [Give Now] [Details]                       │
+│ 2025-05-19 08:30 ✓ Given (1000 mg total)    │
+│ 2025-05-19 02:15 ✓ Given (500 mg)           │
+│ [Give Now] [Details]                        │
 └─────────────────────────────────────────────┘
 
 REFUSALS:
 ┌─────────────────────────────────────────────┐
-│ 2025-05-19 12:00 Patient refused Metoprolol│
-│ Reason: Dizziness                          │
-│ Nurse: Kim Johnson                         │
-│ [Document Refusal] [Contact Provider]      │
+│ 2025-05-19 12:00 Patient refused Metoprolol │
+│ Reason: Dizziness                           │
+│ Nurse: Kim Johnson                          │
+│ [Document Refusal] [Contact Provider]       │
 └─────────────────────────────────────────────┘
 ```
 
@@ -561,11 +567,11 @@ REFUSALS:
 
 ### 8. Medication Reconciliation
 
-```
+```text
 ┌──────────────────────────────────────────┐
-│  MEDICATION RECONCILIATION                │
-│  Patient: John SMITH                      │
-│  Encounter: 2025-05-19 (Admission)        │
+│  MEDICATION RECONCILIATION               │
+│  Patient: John SMITH                     │
+│  Encounter: 2025-05-19 (Admission)       │
 └──────────────────────────────────────────┘
 
 CURRENT HOME MEDICATIONS (Patient-reported):
@@ -577,7 +583,7 @@ CURRENT HOME MEDICATIONS (Patient-reported):
 │ 5. Multivitamin, PO, OD                  │
 │                                          │
 │ Source: Patient interview (2025-05-19)   │
-│ [Reconciled by: Dr. Johnson]              │
+│ [Reconciled by: Dr. Johnson]             │
 └──────────────────────────────────────────┘
 
 MEDICATION HISTORY (From pharmacy records):
@@ -597,9 +603,9 @@ MEDICATION HISTORY (From pharmacy records):
 
 RECOMMENDED ORDERS FOR ADMISSION:
 ┌──────────────────────────────────────────┐
-│ [✓] Continue Lisinopril 10 mg, PO, OD   │
-│ [✓] Continue Metoprolol 50 mg, PO, BID  │
-│ [✓] Continue Atorvastatin 40 mg, PO, OD │
+│ [✓] Continue Lisinopril 10 mg, PO, OD    │
+│ [✓] Continue Metoprolol 50 mg, PO, BID   │
+│ [✓] Continue Atorvastatin 40 mg, PO, OD  │
 │ [✗] DISCONTINUE Aspirin (ALLERGY)        │
 │ [?] Clarify Omeprazole status            │
 │                                          │
@@ -623,7 +629,7 @@ Signature: [Digital signature]
 
 ### 9. Clinical Decision Support (CDS) Alert
 
-```
+```text
 When order is placed:
 
 ┌─────────────────────────────────────────┐
@@ -634,7 +640,7 @@ When order is placed:
 │ You ordered Metformin 1000 mg BID       │
 │                                         │
 │ ⚠️ WARNING:                             │
-│ This patient's eGFR is 42 mL/min/1.73m²│
+│ This patient's eGFR is 42 mL/min/1.73m² │
 │ (CMP from 2025-05-18)                   │
 │                                         │
 │ RECOMMENDATION:                         │
@@ -645,7 +651,7 @@ When order is placed:
 │ - ADA 2025 Standards of Care            │
 │ - FDA Metformin labeling                │
 │                                         │
-│ [More Info] [Override] [Discontinue]   │
+│ [More Info] [Override] [Discontinue]    │
 ├─────────────────────────────────────────┤
 │ [✓ Continue with caution] [Cancel]      │
 └─────────────────────────────────────────┘
@@ -666,30 +672,30 @@ Note: CDS alert is ADVISORY only. Clinician
 
 ### 10. Appointments & Scheduling
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │  APPOINTMENT CALENDAR                    │
-│  View: [Week ▼] | Date: [2025-05-19 ▼]  │
+│  View: [Week ▼] | Date: [2025-05-19 ▼]   │
 └──────────────────────────────────────────┘
 
 WEEKLY VIEW (Time slots by resource):
 ┌─────────────────────────────────────────────────┐
-│ MON 19   TUE 20   WED 21   THU 22   FRI 23     │
+│ MON 19   TUE 20   WED 21   THU 22   FRI 23      │
 ├─────────────────────────────────────────────────┤
 │ CLINIC A (Dr. Smith)                            │
-│ 09:00 [╳] John DOE              30min          │
-│ 09:30 [╳] BLOCKED (Lunch)      30min          │
-│ 10:00 [ ] Available                            │
-│ 10:30 [╳] Jane SMITH            45min          │
-│ 11:15 [ ] Available                            │
-│ 12:00 [╳] BLOCKED (Lunch)      60min          │
-│                                                │
-│ CLINIC B (Dr. Johnson)                         │
-│ 09:00 [╳] Michael BROWN         30min          │
-│ 09:30 [ ] Available                            │
-│ 10:00 [╳] Sarah WHITE           45min          │
-│ 10:45 [ ] Available                            │
-│ 12:00 [╳] BLOCKED (Lunch)      60min          │
+│ 09:00 [╳] John DOE              30min           │
+│ 09:30 [╳] BLOCKED (Lunch)       30min           │
+│ 10:00 [ ] Available                             │
+│ 10:30 [╳] Jane SMITH            45min           │
+│ 11:15 [ ] Available                             │
+│ 12:00 [╳] BLOCKED (Lunch)       60min           │
+│                                                 │
+│ CLINIC B (Dr. Johnson)                          │
+│ 09:00 [╳] Michael BROWN         30min           │
+│ 09:30 [ ] Available                             │
+│ 10:00 [╳] Sarah WHITE           45min           │
+│ 10:45 [ ] Available                             │
+│ 12:00 [╳] BLOCKED (Lunch)       60min           │
 └─────────────────────────────────────────────────┘
 
 APPOINTMENT DETAILS (Click on slot):
@@ -701,9 +707,9 @@ APPOINTMENT DETAILS (Click on slot):
 │ Time: [10:00 ▼]                          │
 │ Duration: [30 min ▼]                     │
 │ Reason: [Annual Physical______]          │
-│ Provider: [Dr. Sarah Chen ▼]              │
-│ Location: [Clinic A ▼]                    │
-│ Resource: [Exam Room 1 ▼]                 │
+│ Provider: [Dr. Sarah Chen ▼]             │
+│ Location: [Clinic A ▼]                   │
+│ Resource: [Exam Room 1 ▼]                │
 │                                          │
 │ [Send Reminder] [Require Pre-reg]        │
 │                                          │
@@ -724,7 +730,7 @@ APPOINTMENT DETAILS (Click on slot):
 
 ### 11. Quality Reports & Analytics
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │  QUALITY METRICS DASHBOARD               │
 │  Period: [Q2 2025 ▼]  Department: [All ▼]│
@@ -746,7 +752,6 @@ KEY PERFORMANCE INDICATORS:
 └────────────────────┴────────────────────┘
 
 MONTHLY TREND (Line chart):
-```
 Sepsis Mortality Rate (%)
 |
 25 |         ╱╲
@@ -757,7 +762,6 @@ Sepsis Mortality Rate (%)
    |
    └───────────────────→ Month
    J  F  M  A  M  J
-```
 
 ADVERSE EVENTS:
 ┌──────────────────────────────────────────┐
@@ -773,7 +777,6 @@ ADVERSE EVENTS:
 └──────────────────────────────────────────┘
 
 UTILIZATION:
-```
 Bed Occupancy (%)
 ┌──────────────────────────────┐
 │ 4A  ████████████████ 82%     │
@@ -796,7 +799,7 @@ Bed Occupancy (%)
 
 ### 12. Admin Panel - System Health
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │  SYSTEM HEALTH MONITORING                │
 │  Last check: 2025-05-19 10:15 UTC        │
@@ -813,7 +816,7 @@ SYSTEM STATUS:
 │ RIS (HL7)          │ ⚠️  WARN: 30min ago │
 │ Pharmacy (HL7)     │ ✅ OK               │
 │ Meilisearch        │ ✅ OK               │
-│ S3 Storage         │ ✅ OK (1.2 TB used)│
+│ S3 Storage         │ ✅ OK (1.2 TB used) │
 │ Disk Space         │ ⚠️  WARN: 18% free  │
 │ TLS Certificate    │ ✅ OK (365 days)    │
 └────────────────────┴─────────────────────┘
@@ -835,7 +838,7 @@ HL7 MESSAGE TRACKING:
 │ RIS Inbox:   156 pending, 2 dead         │
 │ Outbox:      89 pending, 1 dead          │
 │                                          │
-│ [Retry Dead] [View Log] [Clear Inbox]   │
+│ [Retry Dead] [View Log] [Clear Inbox]    │
 └──────────────────────────────────────────┘
 
 ALERTS:
@@ -853,15 +856,15 @@ ALERTS:
 AUDIT LOG:
 ┌──────────────────────────────────────────┐
 │ Search by user, action, resource         │
-│ Date range: [2025-05-19 ▼] to [today]   │
+│ Date range: [2025-05-19 ▼] to [today]    │
 │                                          │
 │ 2025-05-19 10:15 Database check ✅ OK    │
-│ 2025-05-19 10:10 RIS latency warning    │
-│ 2025-05-19 10:05 Queue job failed       │
-│ 2025-05-19 10:00 LIS sync successful    │
-│ 2025-05-19 09:55 Cache warmed           │
+│ 2025-05-19 10:10 RIS latency warning     │
+│ 2025-05-19 10:05 Queue job failed        │
+│ 2025-05-19 10:00 LIS sync successful     │
+│ 2025-05-19 09:55 Cache warmed            │
 │                                          │
-│ [More] [Export Log]                     │
+│ [More] [Export Log]                      │
 └──────────────────────────────────────────┘
 ```
 
@@ -878,7 +881,7 @@ AUDIT LOG:
 
 ### 13. Audit Log Viewer
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │  AUDIT LOG                               │
 │  Healthcare System PHI Access Log        │
@@ -886,12 +889,12 @@ AUDIT LOG:
 
 FILTER:
 ┌──────────────────────────────────────────┐
-│ Date: [2025-05-19 ▼] to [today ▼]       │
+│ Date: [2025-05-19 ▼] to [today ▼]        │
 │ User: [All Users ▼]                      │
 │ Action: [All ▼]                          │
 │ Resource: [Patient / Encounter / Order]  │
-│ MRN: [____________________]               │
-│ Status: [All / Success / Failure]         │
+│ MRN: [____________________]              │
+│ Status: [All / Success / Failure]        │
 │                                          │
 │ [Search]                                 │
 └──────────────────────────────────────────┘
@@ -901,35 +904,35 @@ RESULTS:
 │ Timestamp    User             Action     │
 ├──────────────────────────────────────────┤
 │ 10:15:23     Dr. Smith        Viewed     │
-│ User: Dr. Mark Smith (ID: user-001)     │
+│ User: Dr. Mark Smith (ID: user-001)      │
 │ Action: Viewed patient chart             │
-│ Resource: Patient #10234567 (John Doe)  │
-│ Status: ✅ Success                       │
-│ Duration: 12 minutes                    │
-│ IP: 192.168.1.100                       │
+│ Resource: Patient #10234567 (John Doe)   │
+│ Status: ✅ Success                        │
+│ Duration: 12 minutes                     │
+│ IP: 192.168.1.100                        │
 │ [View Details]                           │
 │                                          │
 │ 10:02:45     Nurse Kim        Viewed     │
-│ User: Nurse Kim Johnson (ID: user-002)  │
+│ User: Nurse Kim Johnson (ID: user-002)   │
 │ Action: Entered vital signs              │
 │ Resource: Encounter #enc-98765           │
-│ Status: ✅ Success                       │
+│ Status: ✅ Success                        │
 │ Change: Temp 37.2°C, BP 145/92           │
-│ IP: 192.168.1.105                       │
+│ IP: 192.168.1.105                        │
 │ [View Details]                           │
 │                                          │
 │ 09:55:12     Pharmacist Lee   Verified   │
-│ User: Pharmacist Lee Wang (ID: user-003)│
-│ Action: Verified medication order       │
-│ Resource: MedicationOrder #ord-54321    │
-│ Status: ✅ Success                       │
+│ User: Pharmacist Lee Wang (ID: user-003) │
+│ Action: Verified medication order        │
+│ Resource: MedicationOrder #ord-54321     │
+│ Status: ✅ Success                        │
 │ [View Details]                           │
 │                                          │
 │ 09:45:33     Admin System     Created    │
 │ User: System (Automated job)             │
 │ Action: Generated quality metrics        │
 │ Resource: QualityReport #2025-Q2         │
-│ Status: ✅ Success                       │
+│ Status: ✅ Success                        │
 │ [View Details]                           │
 └──────────────────────────────────────────┘
 
@@ -937,8 +940,8 @@ DETAILED VIEW (Click entry):
 ┌──────────────────────────────────────────┐
 │ PHI Access Audit Record                  │
 │                                          │
-│ Timestamp: 2025-05-19 10:15:23 UTC      │
-│ User: Dr. Mark Smith (ID: user-001)     │
+│ Timestamp: 2025-05-19 10:15:23 UTC       │
+│ User: Dr. Mark Smith (ID: user-001)      │
 │ Role: Physician                          │
 │ Action: Viewed patient chart             │
 │ Resource Type: Patient                   │
@@ -947,7 +950,7 @@ DETAILED VIEW (Click entry):
 │ Status: Authorized (Success)             │
 │ Duration: 12 minutes                     │
 │ IP Address: 192.168.1.100                │
-│ User Agent: Safari 17.4 / macOS 14.5    │
+│ User Agent: Safari 17.4 / macOS 14.5     │
 │ Session ID: sess-abc123xyz               │
 │ Purpose: Clinical decision-making        │
 │ Data Accessed:                           │
@@ -970,6 +973,182 @@ DETAILED VIEW (Click entry):
 - Data access granularity
 - Non-tamperable audit trail
 - Export capability
+
+---
+
+### 14. Telehealth & Virtual Care (Phòng khám từ xa)
+
+```text
+┌──────────────────────────────────────────┐
+│  TELEHEALTH WAITING ROOM                 │
+│  Session: Dr. Sarah Chen & John SMITH    │
+└──────────────────────────────────────────┘
+
+STATUS: 🟢 Patient Joined (10:02 AM)
+CONNECTION: 📶 Good (Latency: 45ms)
+PATIENT TOKEN: Validated ✅
+
+[Start Video Session] [Send Message] [Cancel]
+
+┌──────────────────────────────────────────┐
+│ 📹 VIDEO INTERFACE                       │
+│                                          │
+│  ┌────────────────┐  ┌────────────────┐  │
+│  │                │  │                │  │
+│  │ Patient Camera │  │ Provider Cam   │  │
+│  │                │  │                │  │
+│  └────────────────┘  └────────────────┘  │
+│                                          │
+│ 🎤 Mute  📷 Camera  📺 Share  ❌ End    │
+└──────────────────────────────────────────┘
+* Side panel: Quick Vitals, Clinical Notes draft, Orders
+```
+
+**Features:**
+- Real-time connection status monitoring
+- Secure token validation display
+- Integrated side-panel EHR for documenting during the call
+- Automatic Encounter creation upon starting session
+- Duration tracking
+
+---
+
+### 15. Notification Center & Inbox
+
+```text
+┌──────────────────────────────────────────┐
+│ 🔔 NOTIFICATION CENTER                   │
+│  [Critical 🔴 1] [Clinical 🟡 3] [System] │
+└──────────────────────────────────────────┘
+
+🔴 URGENT: CRITICAL LAB VALUE
+Patient: John SMITH (MRN: 10234567)
+Result: Potassium 2.8 mEq/L (LOW)
+Resulted: 10 mins ago | ⚠️ Requires ACK within 20 mins
+[Acknowledge] [View Result] [Escalate]
+
+🟡 CLINICAL: Pharmacy Verification
+Medication: Metformin 1000mg BID
+Patient: John SMITH
+Status: ✅ Verified by Pharmacist Lee
+[View Order]
+
+🟡 CLINICAL: New Medication Order
+Medication: Lisinopril 10mg OD
+Status: Pending Pharmacist Verification
+[Verify Order]
+```
+
+**Features:**
+- Mandatory acknowledgment workflow for critical labs
+- Escalation countdown timer
+- Direct action links to relevant chart sections
+- Role-specific routing (Pharmacy vs Nurse vs Clinician)
+
+---
+
+### 16. Clinical Notes (Documentation)
+
+```text
+┌──────────────────────────────────────────┐
+│  CLINICAL NOTE EDITOR                    │
+│  Encounter: 2025-05-19 (Admission)       │
+└──────────────────────────────────────────┘
+
+Note Type: [Progress Note (LOINC: 11506-3) ▼]
+Template:  [SOAP Note Standard ▼]
+
+SUBJECTIVE:
+[Patient reports chest pain has subsided...]
+
+OBJECTIVE:
+[⬇️ Import Latest Vitals] [⬇️ Import Recent Labs]
+BP 145/92, HR 88, Temp 37.2°C.
+Labs: WBC normal, Troponin pending.
+
+ASSESSMENT:
+1. Hypertension (I10) - Uncontrolled
+2. Chest pain, unspecified (R07.9)
+
+PLAN:
+[Continue Metoprolol, await Troponin results...]
+
+Status: DRAFT | Author: Dr. Mark Smith
+[Save Draft] [Sign & Attest Note] [Cancel]
+```
+
+**Features:**
+- LOINC-mapped document types
+- Smart text/templates expansion
+- Data imports (vitals, labs, current meds)
+- Version history & amendment tracking
+- Digital signature & attestation workflow
+
+---
+
+### 17. Problem List (Conditions) Management
+
+```text
+┌──────────────────────────────────────────┐
+│  PROBLEM LIST                            │
+│  Patient: John SMITH                     │
+└──────────────────────────────────────────┘
+
+Add New Diagnosis:
+Search: [Hypertens____________________ 🔍]
+└─> ✓ Essential (primary) hypertension (ICD-10: I10)
+    ✓ Hypertensive heart disease (ICD-10: I11.9)
+    ✓ Pulmonary hypertension (SNOMED: 70995007)
+
+ACTIVE CONDITIONS:
+┌──────────────────────────────────────────┐
+│ 🔴 Essential (primary) hypertension (I10)│
+│    Onset: 2020-05-15 | Severity: Moderate│
+│    Status: Active | Ver: Confirmed       │
+│    [Resolve] [Edit]                      │
+└──────────────────────────────────────────┘
+
+RESOLVED / INACTIVE:
+┌──────────────────────────────────────────┐
+│ ✅ Acute bronchitis (J20.9)              │
+│    Resolved: 2025-01-20                  │
+└──────────────────────────────────────────┘
+```
+
+**Features:**
+- Integrated Terminology lookup (ICD-10, SNOMED)
+- Differentiate between active and historical problems
+- Status tracking (Active, Relapse, Remission, Resolved)
+- Severity mapping
+
+---
+
+### 18. Interoperability & FHIR Export
+
+```text
+┌──────────────────────────────────────────┐
+│  DATA EXPORT & INTEGRATION               │
+└──────────────────────────────────────────┘
+
+Export Patient Data (FHIR R4):
+Scope:  [All Records ($everything) ▼]
+Format: [JSON (FHIR Bundle) ▼]
+
+[⬇️ Download FHIR Bundle]
+[🔗 Send to 3rd Party Application (API)]
+
+SYSTEM INTEGRATION STATUS (Admin):
+┌──────────────────────────────────────────┐
+│ LIS (Labs)      : 🟢 Connected (HL7 ORM) │
+│ RIS (Imaging)   : 🟢 Connected (HL7 OMI) │
+│ PHARMACY        : 🟡 Syncing (HL7 OMP)   │
+└──────────────────────────────────────────┘
+```
+
+**Features:**
+- Generate FHIR R4 standard bundles for interoperability
+- `$everything` payload support for patient portability
+- HL7 interface status overview
 
 ---
 
@@ -1088,6 +1267,22 @@ Echo.channel(`department.${departmentId}`)
     .listen('MedicationAdministered', (event) => {
         updateMARDisplay(event);
     });
+
+// Listen for Telehealth events
+Echo.private(`telehealth.${sessionId}`)
+    .listen('PatientArrived', (event) => {
+        telehealthStore.updateStatus('patient_waiting');
+        toast.info('Patient has arrived in the waiting room');
+    });
+
+// Listen for Notifications Inbox
+Echo.private(`App.Models.User.${userId}`)
+    .notification((notification) => {
+        notificationStore.add(notification);
+        if(notification.type === 'critical_lab') {
+            playCriticalAlertSound();
+        }
+    });
 ```
 
 ---
@@ -1199,7 +1394,7 @@ All views must be responsive:
 
 ### Keyboard Shortcuts
 
-```
+```text
 Ctrl + K       Search patient (quick search modal)
 Ctrl + N       New encounter
 Ctrl + O       Place new order
@@ -1442,7 +1637,7 @@ describe('Patient Chart Workflow', () => {
 
 ## Deployment Checklist
 
-```
+```text
 Frontend Build:
 □ npm run build (minification, tree-shaking)
 □ npm run build:css (Tailwind purge)
@@ -1513,8 +1708,9 @@ This frontend architecture prioritizes:
 - **Clinical usability** (minimize clicks, clear workflows)
 - **Safety** (CDS alerts, allergy checks, critical value escalation)
 - **HIPAA compliance** (PHI protection, audit logging, session management)
+- **Interoperability & Expansion** (Telehealth support, FHIR integration ready)
 - **Performance** (real-time updates, responsive, offline capable)
 - **Accessibility** (WCAG AA, keyboard navigation)
 - **Resilience** (downtime procedures, graceful degradation)
 
-All views are mobile-responsive and tested for accessibility. Real-time updates via WebSocket keep clinicians informed of urgent events (critical values, new results, medication alerts).
+All views are mobile-responsive and tested for accessibility. Real-time updates via WebSocket keep clinicians informed of urgent events (critical values, new results, medication alerts, telehealth sessions).
