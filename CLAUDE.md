@@ -1438,134 +1438,6 @@ return [
 
 ---
 
-## Naming Conventions
-
-```
-Models:         PascalCase, singular        Patient, LabResult, MedicationOrder
-Tables:         snake_case, plural          patients, lab_results, medication_orders
-Controllers:    PascalCase + Controller     PatientController, LabResultController
-Services:       PascalCase + Service        MpiService, CpoeService, AuditService
-Jobs:           PascalCase, verb phrase     ProcessIncomingHl7Message, NotifyCriticalLabValue
-Events:         PascalCase, past tense      PatientAdmitted, OrderPlaced, LabResultReceived
-Policies:       PascalCase + Policy         PatientPolicy, OrderPolicy
-DTOs:           PascalCase + Dto            PlaceOrderDto, AdmitPatientDto
-Enums:          PascalCase                  EncounterStatus, OrderPriority, AbnormalFlag
-```
-
----
-
-## Environment Variables Bắt buộc
-
-```ini
-# App
-APP_ENV=production
-APP_KEY=                          # 32-char random key
-
-# Database
-DB_CONNECTION=mysql
-DB_HOST=
-DB_DATABASE=healthsystem
-DB_USERNAME=
-DB_PASSWORD=
-
-# Redis
-REDIS_HOST=
-REDIS_PASSWORD=
-
-# HL7 Connections (điền theo hệ thống tích hợp)
-LIS_HOST=
-LIS_PORT=6661
-RIS_HOST=
-RIS_PORT=6662
-PHARMACY_HOST=
-PHARMACY_PORT=6663
-
-# Storage (S3-compatible)
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_BUCKET=
-AWS_ENDPOINT=                     # nếu dùng MinIO
-
-# Security
-SESSION_LIFETIME=15               # idle timeout minutes (HIPAA requirement)
-PASSWORD_EXPIRY_DAYS=90
-MFA_REQUIRED=true
-
-# Queues
-QUEUE_CONNECTION=redis
-HORIZON_ENABLED=true
-
-# Search
-MEILISEARCH_HOST=
-MEILISEARCH_KEY=
-
-# Notifications
-MAIL_MAILER=smtp
-MAIL_HOST=
-MAIL_PORT=587
-MAIL_ENCRYPTION=tls
-
-# Monitoring
-SENTRY_DSN=                       # error tracking
-LOG_CHANNEL=stack
-LOG_LEVEL=warning                 # production: warning, không log PHI
-```
-
----
-
-## Các quy tắc tuyệt đối KHÔNG vi phạm
-
-```
-1. KHÔNG hard delete bất kỳ PHI record nào — chỉ soft delete hoặc logical deactivate
-2. KHÔNG log PHI vào application logs (names, DOB, MRN, phone, email, IP)
-3. KHÔNG gửi PHI trong URL/query string — dùng POST body hoặc encrypted path param
-4. KHÔNG share user accounts — mỗi nhân viên một account với MFA
-5. KHÔNG lưu plain text password hoặc credentials trong code/config/log
-6. KHÔNG để CDS alert block việc đặt lệnh — CDS là advisory, không bao giờ interrupt
-7. KHÔNG random split data cho analytics — dùng temporal split
-8. KHÔNG cache PHI response không có expiry ngắn (max 5 phút)
-9. KHÔNG skip audit log cho bất kỳ PHI access nào dù là internal job
-10. KHÔNG hard-code terminology codes (ICD, LOINC) trong code — dùng lookup table
-```
-
----
-
-## Checklist trước khi deploy
-
-```
-Security:
-□ MFA enabled cho tất cả accounts
-□ TLS 1.2+ enforce (disable TLS 1.0/1.1)
-□ AES-256 encryption cho sensitive DB columns
-□ Audit log không thể bị xóa/sửa
-□ PHI scrubbing middleware active
-□ Rate limiting configured
-□ Session idle timeout = 15 phút
-□ Password complexity + expiry configured
-
-Integration:
-□ HL7 outbox pattern implemented (atomic với business events)
-□ Idempotency check cho incoming HL7 (MSH-10)
-□ DLQ configured cho failed messages
-□ MLLP retry với exponential backoff
-
-Clinical Safety:
-□ Critical value workflow: notify → acknowledge → escalate
-□ CDS alerts không block CPOE
-□ Medication barcode verification bắt buộc
-□ Allergy check tự động khi đặt lệnh thuốc
-□ 5 Rights of Medication enforced
-
-Operations:
-□ DB backup daily, test restore hàng tuần
-□ Queue monitoring (Horizon dashboard)
-□ Error tracking (Sentry) configured
-□ Health check endpoint /health
-□ Downtime procedures documented
-```
-
----
-
 ## FHIR R4 — Resource Mapping
 
 Mọi FHIR response phải tuân theo cấu trúc chuẩn. Controller không build JSON thủ công — dùng FhirMapper.
@@ -3120,4 +2992,132 @@ class WarmDowntimeCacheCommand extends Command
         $this->info('Downtime cache warmed.');
     }
 }
+```
+
+---
+
+## Naming Conventions
+
+```
+Models:         PascalCase, singular        Patient, LabResult, MedicationOrder
+Tables:         snake_case, plural          patients, lab_results, medication_orders
+Controllers:    PascalCase + Controller     PatientController, LabResultController
+Services:       PascalCase + Service        MpiService, CpoeService, AuditService
+Jobs:           PascalCase, verb phrase     ProcessIncomingHl7Message, NotifyCriticalLabValue
+Events:         PascalCase, past tense      PatientAdmitted, OrderPlaced, LabResultReceived
+Policies:       PascalCase + Policy         PatientPolicy, OrderPolicy
+DTOs:           PascalCase + Dto            PlaceOrderDto, AdmitPatientDto
+Enums:          PascalCase                  EncounterStatus, OrderPriority, AbnormalFlag
+```
+
+---
+
+## Environment Variables Bắt buộc
+
+```ini
+# App
+APP_ENV=production
+APP_KEY=                          # 32-char random key
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=
+DB_DATABASE=healthsystem
+DB_USERNAME=
+DB_PASSWORD=
+
+# Redis
+REDIS_HOST=
+REDIS_PASSWORD=
+
+# HL7 Connections (điền theo hệ thống tích hợp)
+LIS_HOST=
+LIS_PORT=6661
+RIS_HOST=
+RIS_PORT=6662
+PHARMACY_HOST=
+PHARMACY_PORT=6663
+
+# Storage (S3-compatible)
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_BUCKET=
+AWS_ENDPOINT=                     # nếu dùng MinIO
+
+# Security
+SESSION_LIFETIME=15               # idle timeout minutes (HIPAA requirement)
+PASSWORD_EXPIRY_DAYS=90
+MFA_REQUIRED=true
+
+# Queues
+QUEUE_CONNECTION=redis
+HORIZON_ENABLED=true
+
+# Search
+MEILISEARCH_HOST=
+MEILISEARCH_KEY=
+
+# Notifications
+MAIL_MAILER=smtp
+MAIL_HOST=
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+
+# Monitoring
+SENTRY_DSN=                       # error tracking
+LOG_CHANNEL=stack
+LOG_LEVEL=warning                 # production: warning, không log PHI
+```
+
+---
+
+## Các quy tắc tuyệt đối KHÔNG vi phạm
+
+```
+1. KHÔNG hard delete bất kỳ PHI record nào — chỉ soft delete hoặc logical deactivate
+2. KHÔNG log PHI vào application logs (names, DOB, MRN, phone, email, IP)
+3. KHÔNG gửi PHI trong URL/query string — dùng POST body hoặc encrypted path param
+4. KHÔNG share user accounts — mỗi nhân viên một account với MFA
+5. KHÔNG lưu plain text password hoặc credentials trong code/config/log
+6. KHÔNG để CDS alert block việc đặt lệnh — CDS là advisory, không bao giờ interrupt
+7. KHÔNG random split data cho analytics — dùng temporal split
+8. KHÔNG cache PHI response không có expiry ngắn (max 5 phút)
+9. KHÔNG skip audit log cho bất kỳ PHI access nào dù là internal job
+10. KHÔNG hard-code terminology codes (ICD, LOINC) trong code — dùng lookup table
+```
+
+---
+
+## Checklist trước khi deploy
+
+```
+Security:
+□ MFA enabled cho tất cả accounts
+□ TLS 1.2+ enforce (disable TLS 1.0/1.1)
+□ AES-256 encryption cho sensitive DB columns
+□ Audit log không thể bị xóa/sửa
+□ PHI scrubbing middleware active
+□ Rate limiting configured
+□ Session idle timeout = 15 phút
+□ Password complexity + expiry configured
+
+Integration:
+□ HL7 outbox pattern implemented (atomic với business events)
+□ Idempotency check cho incoming HL7 (MSH-10)
+□ DLQ configured cho failed messages
+□ MLLP retry với exponential backoff
+
+Clinical Safety:
+□ Critical value workflow: notify → acknowledge → escalate
+□ CDS alerts không block CPOE
+□ Medication barcode verification bắt buộc
+□ Allergy check tự động khi đặt lệnh thuốc
+□ 5 Rights of Medication enforced
+
+Operations:
+□ DB backup daily, test restore hàng tuần
+□ Queue monitoring (Horizon dashboard)
+□ Error tracking (Sentry) configured
+□ Health check endpoint /health
+□ Downtime procedures documented
 ```
