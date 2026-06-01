@@ -3,21 +3,22 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Admin mặc định — đổi mật khẩu sau khi deploy production
+        User::firstOrCreate(
+            ['email' => 'admin@hospital.local'],
+            [
+                "uuid" => '00000000-0000-0000-0000-000000000001',
+                'username' => 'admin',
+                'password' => Hash::make('Admin@123456'),
+                'status'   => 'active',
+            ]
+        );
     }
 }
