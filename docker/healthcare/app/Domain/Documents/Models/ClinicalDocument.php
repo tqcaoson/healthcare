@@ -2,9 +2,9 @@
 
 namespace App\Domain\Documents\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Domain\Common\Models\PhiModel;
 
-class ClinicalDocument extends Model
+class ClinicalDocument extends PhiModel
 {
     protected $table = 'clinical_documents';
 

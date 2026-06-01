@@ -27,6 +27,10 @@ class Order extends PhiModel
         'ordered_by',
         'ordered_at',
         'scheduled_for',
+        'completed_at',
+        'cancelled_at',
+        'cancelled_by',
+        'cancel_reason',
         'clinical_indication',
     ];
 

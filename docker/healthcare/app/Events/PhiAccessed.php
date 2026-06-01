@@ -11,7 +11,7 @@ class PhiAccessed
     use SerializesModels;
 
     public function __construct(
-        mixed $resource
+        public readonly mixed $resource
     ) {
     }
 }

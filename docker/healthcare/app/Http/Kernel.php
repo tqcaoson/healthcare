@@ -34,5 +34,11 @@ class Kernel extends HttpKernel
 
         'require-mfa' =>
             \App\Http\Middleware\RequireMfa::class,
+
+        'require.mfa' =>
+            \App\Http\Middleware\RequireMfa::class,
+
+        'audit.phi' =>
+            \App\Http\Middleware\AuditPhiAccess::class,
     ];
 }

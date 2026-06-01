@@ -2,9 +2,9 @@
 
 namespace App\Domain\Billing\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Domain\Common\Models\PhiModel;
 
-class Invoice extends Model
+class Invoice extends PhiModel
 {
     protected $table = 'invoices';
 

@@ -12,7 +12,7 @@ class OrderPlaced
     use SerializesModels;
 
     public function __construct(
-        Order $order
+        public readonly Order $order
     ) {
     }
 }
