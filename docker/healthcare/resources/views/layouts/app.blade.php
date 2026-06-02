@@ -10,10 +10,9 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    @vite([
-        'resources/css/app.css',
-        'resources/js/app.js'
-    ])
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @vite(['resources/css/app.css'])
 
     <title>
         @yield('page-title')
@@ -44,6 +43,8 @@
 
         </main>
     </div>
+
+    @vite(['resources/js/app.js'])
 
 </body>
 </html>

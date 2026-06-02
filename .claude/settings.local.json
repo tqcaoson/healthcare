@@ -19,7 +19,9 @@
       "Bash(/run/host/usr/bin/docker compose *)",
       "Bash(/run/host/usr/bin/docker-compose --profile build run --rm node)",
       "Read(//run/user/1000/**)",
-      "Read(//run/**)"
+      "Read(//run/**)",
+      "Bash(docker compose *)",
+      "Bash(docker-compose ps *)"
     ]
   }
 }
