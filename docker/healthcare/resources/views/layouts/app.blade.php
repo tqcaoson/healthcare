@@ -22,11 +22,9 @@
 
 <body>
 
-    @include('components.mobile-sidebar')
+    @include('components.session-timeout')
 
     @include('components.toast-container')
-
-    @include('components.session-timeout')
 
     @include('components.cds-alert-modal')
 
@@ -34,15 +32,11 @@
 
     @include('components.pwa-install-banner')
 
-    @include('components.toast-container')
-
-    @include('components.session-timeout')
-
-    @include('components.mobile-sidebar')
-
     <div class="flex min-h-screen">
 
         @include('components.sidebar')
+
+        @include('components.mobile-sidebar')
 
         <main class="flex-1 p-6">
 

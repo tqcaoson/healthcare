@@ -3,6 +3,7 @@ import Alpine from 'alpinejs';
 import orderEntry from './stores/order-entry';
 import resultsViewer from './stores/results-viewer';
 import notificationInbox from './stores/notification-inbox';
+import notificationCenter from './stores/notification-center';
 import fhirViewer from './stores/fhir-viewer';
 import clinicalNoteEditor from './stores/clinical-note-editor';
 import bedManagement from './stores/bed-management';
@@ -18,29 +19,29 @@ import dicomViewer from './stores/dicom-viewer';
 import cdsAlert from './stores/cds-alert';
 import virtualTable from './stores/virtual-table';
 import biometricLogin from './stores/biometric-login';
-import telemetryWidget
-    from './stores/telemetry-widget';
-
-import deviceIntegration
-    from './stores/device-integration';
-
-import infiniteScroll
-    from './stores/infinite-scroll';
-
-import pwaInstall
-    from './stores/pwa-install';
-
-import stateDebugger
-    from './stores/state-debugger';
-
-import errorBoundary
-    from './stores/error-boundary';
+import telemetryWidget from './stores/telemetry-widget';
+import deviceIntegration from './stores/device-integration';
+import infiniteScroll from './stores/infinite-scroll';
+import pwaInstall from './stores/pwa-install';
+import stateDebugger from './stores/state-debugger';
+import errorBoundary from './stores/error-boundary';
+import sessionTimeout from './stores/session-timeout';
+import appointmentCalendar from './stores/appointment-calendar';
+import lisMonitor from './stores/lis-monitor';
+import pharmacyVerification from './stores/pharmacy-verification';
+import qualityDashboard from './stores/quality-dashboard';
+import telehealthSession from './stores/telehealth-session';
+import labelPrinter from './stores/label-printer';
+import medicationScan from './stores/medication-scan';
+import patientSearch from './stores/patient-search';
+import wcagPanel from './stores/wcag-panel';
 
 window.Alpine = Alpine;
 
 Alpine.data('orderEntry', orderEntry);
 Alpine.data('resultsViewer', resultsViewer);
 Alpine.data('notificationInbox', notificationInbox);
+Alpine.data('notificationCenter', notificationCenter);
 Alpine.data('fhirViewer', fhirViewer);
 Alpine.data('clinicalNoteEditor', clinicalNoteEditor);
 Alpine.data('bedManagement', bedManagement);
@@ -56,34 +57,21 @@ Alpine.data('dicomViewer', dicomViewer);
 Alpine.data('cdsAlert', cdsAlert);
 Alpine.data('virtualTable', virtualTable);
 Alpine.data('biometricLogin', biometricLogin);
-Alpine.data(
-    'telemetryWidget',
-    telemetryWidget
-);
-
-Alpine.data(
-    'deviceIntegration',
-    deviceIntegration
-);
-
-Alpine.data(
-    'infiniteScroll',
-    infiniteScroll
-);
-
-Alpine.data(
-    'pwaInstall',
-    pwaInstall
-);
-
-Alpine.data(
-    'stateDebugger',
-    stateDebugger
-);
-
-Alpine.data(
-    'errorBoundary',
-    errorBoundary
-);
+Alpine.data('telemetryWidget', telemetryWidget);
+Alpine.data('deviceIntegration', deviceIntegration);
+Alpine.data('infiniteScroll', infiniteScroll);
+Alpine.data('pwaInstall', pwaInstall);
+Alpine.data('stateDebugger', stateDebugger);
+Alpine.data('errorBoundary', errorBoundary);
+Alpine.data('sessionTimeout', sessionTimeout);
+Alpine.data('appointmentCalendar', appointmentCalendar);
+Alpine.data('lisMonitor', lisMonitor);
+Alpine.data('pharmacyVerification', pharmacyVerification);
+Alpine.data('qualityDashboard', qualityDashboard);
+Alpine.data('telehealthSession', telehealthSession);
+Alpine.data('labelPrinter', labelPrinter);
+Alpine.data('medicationScan', medicationScan);
+Alpine.data('patientSearch', patientSearch);
+Alpine.data('wcagPanel', wcagPanel);
 
 Alpine.start();

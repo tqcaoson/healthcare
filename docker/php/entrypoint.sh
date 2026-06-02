@@ -13,11 +13,6 @@ chown -R www-data:www-data storage bootstrap/cache
 echo "==> Generating application key (if not set)..."
 php artisan key:generate --no-interaction --force
 
-echo "==> Publishing vendor migrations (Spatie, Sanctum, etc.)..."
-php artisan vendor:publish --tag="permission-migrations" --no-interaction --force || true
-php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider" --no-interaction --force || true
-php artisan vendor:publish --provider="Laravel\Fortify\FortifyServiceProvider" --no-interaction --force || true
-
 echo "==> Running migrations..."
 php artisan migrate --force --no-interaction
 

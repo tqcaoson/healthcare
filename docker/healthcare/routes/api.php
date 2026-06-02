@@ -42,6 +42,6 @@ Route::prefix('v1')
 
         Route::get(
             'dashboard',
-            \App\Http\Controllers\DashboardController::class
+            \App\Http\Controllers\Api\V1\DashboardController::class
         );
     });

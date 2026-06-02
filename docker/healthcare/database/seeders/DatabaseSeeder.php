@@ -12,11 +12,11 @@ class DatabaseSeeder extends Seeder
     {
         // Admin mặc định — đổi mật khẩu sau khi deploy production
         User::firstOrCreate(
-            ['email' => 'admin@hospital.local'],
+            ['email' => 'tqcaoson@gmail.com'],
             [
                 "uuid" => '00000000-0000-0000-0000-000000000001',
                 'username' => 'admin',
-                'password' => Hash::make('Admin@123456'),
+                'password' => Hash::make('123456'),
                 'status'   => 'active',
             ]
         );

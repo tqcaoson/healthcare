@@ -10,8 +10,8 @@ class DashboardController extends Controller
         DashboardService $service
     ) {
 
-        return response()->json(
-            $service->metrics()
-        );
+        return view('dashboard.index', [
+            'metrics' => $service->metrics(),
+        ]);
     }
 }

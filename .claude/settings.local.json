@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp /tmp/healthcare-build/public/build/assets/app-Cdwkpqa6.js /home/deck/Downloads/healthcare/docker/healthcare/public/dist/assets/)",
+      "Bash(cp /tmp/healthcare-build/public/build/assets/app-D4buVpVt.css /home/deck/Downloads/healthcare/docker/healthcare/public/dist/assets/)",
+      "Bash(docker info *)",
+      "Bash(npm --version)",
+      "Bash(ls /home/deck/Downloads/healthcare/docker/healthcare/node_modules/.bin/node 2>/dev/null || find /usr/local/bin /usr/bin /opt -name \"node\" 2>/dev/null | head -3)",
+      "Read(//usr/local/**)",
+      "Bash(which docker.io docker-compose podman 2>/dev/null; ls /usr/bin/docker* /usr/local/bin/docker* 2>/dev/null)",
+      "Read(//usr/bin/**)",
+      "Bash(find /home/deck /opt /usr -name \"docker\" -type f 2>/dev/null | head -5; ls ~/.local/bin/ 2>/dev/null | head -10)",
+      "Read(//home/deck/**)",
+      "Read(//home/deck/.local/bin/**)",
+      "Bash(find /home/deck/.nvm /home/deck/.volta /home/deck/.local -name \"node\" -type f 2>/dev/null | head -5; find /run/host -name \"docker\" 2>/dev/null | head -3)",
+      "Read(//run/host/**)",
+      "Bash(/home/deck/.nvm/versions/node/v22.22.3/bin/node /home/deck/.nvm/versions/node/v22.22.3/bin/npm run build)",
+      "Bash(PATH=/home/deck/.nvm/versions/node/v22.22.3/bin:__TRACKED_VAR__ node_modules/.bin/vite build)",
+      "Bash(/run/host/usr/bin/docker compose *)",
+      "Bash(/run/host/usr/bin/docker-compose --profile build run --rm node)",
+      "Read(//run/user/1000/**)",
+      "Read(//run/**)"
+    ]
+  }
+}
