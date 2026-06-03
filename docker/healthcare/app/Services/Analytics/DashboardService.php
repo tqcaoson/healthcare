@@ -83,7 +83,11 @@ class DashboardService
             ->whereYear('start_at', $today->year)
             ->whereMonth('start_at', $today->month)
             ->where('status', '!=', 'cancelled')
-            ->selectRaw('DAY(start_at) as d')
+            ->selectRaw(
+                config('database.default') === 'sqlite'
+                    ? "CAST(strftime('%d', start_at) AS INTEGER) as d"
+                    : 'DAY(start_at) as d'
+            )
             ->distinct()
             ->pluck('d')
             ->toArray();
