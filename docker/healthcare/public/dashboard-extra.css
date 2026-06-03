@@ -1,0 +1,64 @@
+/* Dashboard redesign additional styles */
+.sidebar-icon-link{width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;border-radius:.75rem;color:#bfdbfe;transition:all .15s;}
+.sidebar-icon-link:hover{background-color:#1d4ed8;color:#fff;}
+.sidebar-icon-active{background-color:#fff!important;color:#1d40af!important;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.shrink-0{flex-shrink:0!important;}
+.min-w-0{min-width:0!important;}
+.w-16{width:4rem!important;}
+.w-64{width:16rem!important;}
+.bg-blue-700{background-color:#1d4ed8!important;}
+.bg-blue-100{background-color:#dbeafe!important;}
+.bg-green-100{background-color:#dcfce7!important;}
+.bg-amber-100{background-color:#fef3c7!important;}
+.bg-teal-100{background-color:#ccfbf1!important;}
+.bg-cyan-100{background-color:#cffafe!important;}
+.border-blue-400{border-color:#60a5fa!important;}
+.border-teal-400{border-color:#2dd4bf!important;}
+.border-yellow-400{border-color:#facc15!important;}
+.border-cyan-400{border-color:#22d3ee!important;}
+.border-slate-400{border-color:#94a3b8!important;}
+.border-l-4{border-left-width:4px!important;}
+.text-blue-800{color:#1e40af!important;}
+.text-yellow-800{color:#854d0e!important;}
+.text-teal-800{color:#115e59!important;}
+.text-cyan-800{color:#155e75!important;}
+.text-blue-500{color:#3b82f6!important;}
+.bg-blue-400{background-color:#60a5fa!important;}
+.border-white{border-color:#fff!important;}
+.border-blue-500{border-color:#3b82f6!important;}
+.col-span-2{grid-column:span 2/span 2!important;}
+.col-span-3{grid-column:span 3/span 3!important;}
+.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))!important;}
+.gap-5{gap:1.25rem!important;}
+.gap-y-1{row-gap:.25rem!important;}
+.overflow-hidden{overflow:hidden!important;}
+.overflow-y-auto{overflow-y:auto!important;}
+.break-all{word-break:break-all!important;}
+.leading-tight{line-height:1.25!important;}
+.leading-snug{line-height:1.375!important;}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important;}
+.-translate-x-1\/2{transform:translateX(-50%)!important;}
+.bottom-0{bottom:0!important;}
+.right-0{right:0!important;}
+.left-1\/2{left:50%!important;}
+.w-24{width:6rem!important;}
+.h-20{height:5rem!important;}
+.opacity-10{opacity:.1!important;}
+.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-from,#f1f5f9),var(--tw-gradient-to,#eff6ff))!important;}
+.from-slate-100{--tw-gradient-from:#f1f5f9;}
+.to-blue-50{--tw-gradient-to:#eff6ff;}
+.from-blue-400{--tw-gradient-from:#60a5fa;}
+.to-blue-600{--tw-gradient-to:#2563eb;}
+.from-slate-400{--tw-gradient-from:#94a3b8;}
+.to-slate-600{--tw-gradient-to:#475569;}
+
+/* Fix sidebar compact layout */
+aside.w-16 { width: 4rem; min-height: 100vh; }
+aside.w-16 .sidebar-icon-link { width: 2.5rem; height: 2.5rem; }
+
+/* Schedule grid */
+.schedule-grid { display: grid; }
+
+/* Hover states for schedule rows */
+.hover\:bg-slate-50\/50:hover { background-color: rgba(248,250,252,.5); }

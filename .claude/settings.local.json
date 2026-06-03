@@ -31,7 +31,12 @@
       "Bash(php /home/deck/Downloads/healthcare/docker/healthcare/artisan migrate --path=database/migrations/2026_01_01_000020_create_permission_tables.php)",
       "Bash(xargs ls -la)",
       "Bash(xargs ls)",
-      "Bash(podman-compose ps *)"
+      "Bash(podman-compose ps *)",
+      "Bash(npm run *)",
+      "Bash(php -l /home/deck/Downloads/healthcare/docker/healthcare/app/Http/Controllers/DashboardController.php)",
+      "Bash(php -l /home/deck/Downloads/healthcare/docker/healthcare/app/Services/Analytics/DashboardService.php)",
+      "Bash(find /usr /opt /app -name php -type f 2>/dev/null | head -5)",
+      "Read(//opt/**)"
     ]
   }
 }

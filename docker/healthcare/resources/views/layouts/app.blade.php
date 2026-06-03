@@ -12,7 +12,9 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     @vite(['resources/css/app.css'])
+    <link rel="stylesheet" href="/dashboard-extra.css">
 
     <title>
         @yield('page-title', config('app.name'))
@@ -37,7 +39,7 @@
 
         @include('components.mobile-sidebar')
 
-        <main class="flex-1 p-6">
+        <main class="flex-1 @yield('main-class', 'p-6') overflow-auto">
 
             @yield('content')
 
@@ -45,6 +47,7 @@
     </div>
 
     @vite(['resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     @stack('scripts')
 
