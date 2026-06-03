@@ -3,6 +3,8 @@
 namespace App\Domain\Medication\Models;
 
 use App\Domain\Common\Models\PhiModel;
+use App\Domain\Patient\Models\Patient;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MedicationAdministration extends PhiModel
 {
@@ -38,4 +40,9 @@ class MedicationAdministration extends PhiModel
         'administered_at' => 'datetime',
         'is_prn' => 'boolean',
     ];
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

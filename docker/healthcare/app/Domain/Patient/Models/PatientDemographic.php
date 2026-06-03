@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PatientDemographic extends PhiModel
 {
     protected $table = 'patient_demographics';
+    public $timestamps = false;
 
     protected $fillable = [
         'patient_id',

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->timestamp('attested_at')->nullable();
             $table->timestamp('documented_at');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('clinical_note_versions', function (Blueprint $table) {

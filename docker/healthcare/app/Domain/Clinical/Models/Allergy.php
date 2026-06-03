@@ -7,6 +7,7 @@ use App\Domain\Common\Models\PhiModel;
 class Allergy extends PhiModel
 {
     protected $table = 'allergies';
+    public $timestamps = false;
 
     protected $fillable = [
         'patient_id',

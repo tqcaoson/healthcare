@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->text('note')->nullable();
+            $table->softDeletes();
 
             $table->index(['patient_id', 'clinical_status']);
         });
@@ -46,6 +47,7 @@ return new class extends Migration
             $table->date('abatement_date')->nullable();
             $table->timestamp('recorded_at');
             $table->unsignedBigInteger('recorded_by');
+            $table->softDeletes();
 
             $table->index(['patient_id', 'clinical_status']);
         });

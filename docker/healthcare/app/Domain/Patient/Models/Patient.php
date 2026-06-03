@@ -8,7 +8,6 @@ use App\Domain\Clinical\Models\Condition;
 use App\Domain\Clinical\Models\VitalSign;
 use App\Domain\Encounter\Models\Encounter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -17,7 +16,6 @@ use Laravel\Scout\Searchable;
 class Patient extends PhiModel
 {
     use HasFactory;
-    use HasUuids;
     use Searchable;
 
     protected $table = 'patients';

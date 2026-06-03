@@ -3,6 +3,8 @@
 namespace App\Domain\Result\Models;
 
 use App\Domain\Common\Models\PhiModel;
+use App\Domain\Patient\Models\Patient;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LabResult extends PhiModel
 {
@@ -32,4 +34,9 @@ class LabResult extends PhiModel
         'resulted_at' => 'datetime',
         'is_critical' => 'boolean',
     ];
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

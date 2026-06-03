@@ -28,6 +28,7 @@ return new class extends Migration
             $table->boolean('is_current')->default(true);
             $table->unsignedBigInteger('changed_by');
             $table->timestamp('changed_at');
+            $table->softDeletes();
         });
 
         Schema::create('patient_identifiers', function (Blueprint $table) {

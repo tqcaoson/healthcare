@@ -5,14 +5,12 @@ namespace App\Domain\Order\Models;
 use App\Domain\Common\Models\PhiModel;
 use App\Domain\Encounter\Models\Encounter;
 use App\Domain\Patient\Models\Patient;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends PhiModel
 {
     use HasFactory;
-    use HasUuids;
 
     protected $table = 'orders';
 

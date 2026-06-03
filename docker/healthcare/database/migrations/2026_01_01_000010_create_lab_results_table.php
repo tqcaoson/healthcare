@@ -38,6 +38,7 @@ return new class extends Migration
             $table->unsignedBigInteger('critical_notified_to')->nullable();
             $table->boolean('critical_readback_confirmed')->default(false);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['patient_id', 'loinc_code']);
             $table->index('encounter_id');

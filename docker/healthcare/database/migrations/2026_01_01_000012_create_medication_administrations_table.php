@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('medication_administrations', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
-            $table->foreignId('order_id')->constrained();
+            $table->foreignId('order_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('patient_id')->constrained();
-            $table->foreignId('encounter_id')->constrained();
+            $table->foreignId('encounter_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('status', ['in-progress','completed','not-done','on-hold','stopped','unknown'])->default('completed');
             $table->boolean('patient_verified_by_barcode')->default(false);
             $table->boolean('medication_verified_by_barcode')->default(false);
@@ -33,6 +33,7 @@ return new class extends Migration
             $table->unsignedBigInteger('waste_witnessed_by')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

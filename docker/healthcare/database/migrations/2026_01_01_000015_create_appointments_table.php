@@ -26,6 +26,7 @@ return new class extends Migration
             $table->timestamp('cancelled_at')->nullable();
             $table->string('cancel_reason', 500)->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['provider_id', 'start_at']);
             $table->index(['department_id', 'start_at']);

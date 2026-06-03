@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class VitalSign extends PhiModel
 {
     protected $table = 'vital_signs';
+    public $timestamps = false;
 
     protected $fillable = [
         'patient_id',

@@ -26,10 +26,16 @@ return new class extends Migration
 
             $table->string('class');
 
+            $table->string('admission_source', 50)->nullable();
+            $table->string('discharge_disposition', 50)->nullable();
+
             $table->timestamp('period_start');
 
             $table->timestamp('period_end')
                 ->nullable();
+
+            $table->unsignedBigInteger('attending_provider_id')->nullable();
+            $table->unsignedBigInteger('admitting_provider_id')->nullable();
 
             $table->unsignedBigInteger('department_id')
                 ->nullable();

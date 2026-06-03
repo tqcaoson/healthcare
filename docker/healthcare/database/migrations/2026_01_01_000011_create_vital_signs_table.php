@@ -27,6 +27,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('pain_score')->nullable();
             $table->unsignedTinyInteger('gcs_total')->nullable();
             $table->text('notes')->nullable();
+            $table->softDeletes();
 
             $table->index(['patient_id', 'recorded_at']);
         });

@@ -32,17 +32,17 @@
             Results
         </a>
 
-        <a href="/medications"
+        <a href="{{ route('medications.index') }}"
            class="sidebar-link">
             Medications
         </a>
 
-        <a href="/appointments"
+        <a href="{{ route('appointments.index') }}"
            class="sidebar-link">
             Scheduling
         </a>
 
-        <a href="/reports"
+        <a href="{{ route('reports.index') }}"
            class="sidebar-link">
             Reports
         </a>

@@ -7,6 +7,7 @@ use App\Domain\Common\Models\PhiModel;
 class Condition extends PhiModel
 {
     protected $table = 'conditions';
+    public $timestamps = false;
 
     protected $fillable = [
         'uuid',
