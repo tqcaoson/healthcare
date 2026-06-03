@@ -291,16 +291,50 @@
         <div class="w-64 flex flex-col gap-4 shrink-0">
 
             {{-- Mini Calendar --}}
-            <div class="bg-white rounded-2xl shadow-sm p-4">
+            <div class="bg-white rounded-2xl shadow-sm p-4"
+                 x-data="{
+                     year:  {{ now()->year }},
+                     month: {{ now()->month - 1 }},
+                     today: { y: {{ now()->year }}, m: {{ now()->month - 1 }}, d: {{ now()->day }} },
+                     busyDays: @json($calendar['busy_days']),
+                     monthNames: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+                     get label() { return this.monthNames[this.month] + ' ' + this.year; },
+                     get firstDow() {
+                         return new Date(this.year, this.month, 1).getDay();
+                     },
+                     get daysInMonth() {
+                         return new Date(this.year, this.month + 1, 0).getDate();
+                     },
+                     get cells() {
+                         let out = [];
+                         let start = 1 - this.firstDow;
+                         let rows = Math.ceil((this.firstDow + this.daysInMonth) / 7);
+                         for (let r = 0; r < rows; r++) {
+                             for (let c = 0; c < 7; c++) {
+                                 let d = start + r * 7 + c;
+                                 out.push(d >= 1 && d <= this.daysInMonth ? d : null);
+                             }
+                         }
+                         return out;
+                     },
+                     isToday(d) {
+                         return d !== null && d === this.today.d && this.month === this.today.m && this.year === this.today.y;
+                     },
+                     isBusy(d) {
+                         return d !== null && this.month === this.today.m && this.year === this.today.y && this.busyDays.includes(d);
+                     },
+                     prev() { if (this.month === 0) { this.month = 11; this.year--; } else { this.month--; } },
+                     next() { if (this.month === 11) { this.month = 0; this.year++; } else { this.month++; } },
+                 }">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="font-semibold text-slate-800 text-sm">{{ $calendar['month'] }}</span>
+                    <span class="font-semibold text-slate-800 text-sm" x-text="label"></span>
                     <div class="flex gap-1">
-                        <button class="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+                        <button @click="prev()" class="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                             </svg>
                         </button>
-                        <button class="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+                        <button @click="next()" class="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
@@ -316,34 +350,19 @@
                 </div>
 
                 {{-- Calendar grid --}}
-                @php
-                    $cells = $calendar['first_dow'] + $calendar['days_in'];
-                    $rows  = ceil($cells / 7);
-                    $dayNum = 1 - $calendar['first_dow'];
-                @endphp
                 <div class="grid grid-cols-7 gap-y-1 text-center">
-                    @for($r = 0; $r < $rows; $r++)
-                        @for($c = 0; $c < 7; $c++)
-                            @php $d = $dayNum + $r * 7 + $c; @endphp
-                            @if($d >= 1 && $d <= $calendar['days_in'])
-                                @php
-                                    $isToday  = $d === $calendar['today'];
-                                    $hasBusy  = in_array($d, $calendar['busy_days']);
-                                @endphp
-                                <div class="relative flex items-center justify-center">
-                                    <span class="w-6 h-6 flex items-center justify-center rounded-full text-xs
-                                        {{ $isToday ? 'bg-blue-600 text-white font-bold' : ($hasBusy ? 'text-blue-600 font-semibold' : 'text-slate-700 hover:bg-slate-100') }}">
-                                        {{ $d }}
-                                    </span>
-                                    @if($hasBusy && !$isToday)
-                                    <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-400 rounded-full"></span>
-                                    @endif
-                                </div>
-                            @else
-                                <div></div>
-                            @endif
-                        @endfor
-                    @endfor
+                    <template x-for="(d, i) in cells" :key="i">
+                        <div class="relative flex items-center justify-center">
+                            <template x-if="d !== null">
+                                <span class="w-6 h-6 flex items-center justify-center rounded-full text-xs cursor-default"
+                                      :class="isToday(d) ? 'bg-blue-600 text-white font-bold' : (isBusy(d) ? 'text-blue-600 font-semibold' : 'text-slate-700 hover:bg-slate-100')"
+                                      x-text="d"></span>
+                            </template>
+                            <template x-if="isBusy(d) && !isToday(d)">
+                                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-400 rounded-full"></span>
+                            </template>
+                        </div>
+                    </template>
                 </div>
             </div>
 

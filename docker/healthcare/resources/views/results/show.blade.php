@@ -2,18 +2,26 @@
 @section('page-title', 'Chi tiết kết quả')
 
 @section('content')
-<div class="p-6 max-w-2xl mx-auto space-y-6">
+<div class="p-6 max-w-3xl mx-auto space-y-6">
 
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="{{ route('results.index') }}" class="text-slate-500 hover:text-slate-800">← Danh sách</a>
             <h1 class="text-2xl font-bold text-slate-800">Chi tiết kết quả</h1>
         </div>
-        <a href="{{ route('results.edit', $result->id) }}"
-           class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            Chỉnh sửa
-        </a>
+        @if(!in_array($result->status, ['final','cancelled']))
+            <a href="{{ route('results.edit', $result->id) }}"
+               class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                Chỉnh sửa
+            </a>
+        @endif
     </div>
+
+    @if(session('success'))
+        <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+            {{ session('success') }}
+        </div>
+    @endif
 
     @if($result->is_critical)
         <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg font-semibold">
@@ -49,7 +57,7 @@
             <div>
                 <div class="text-slate-500 mb-1">Khoảng tham chiếu</div>
                 <div class="font-medium">
-                    @if($result->reference_low !== null || $result->reference_high !== null)
+                    @if(($result->reference_low ?? null) !== null || ($result->reference_high ?? null) !== null)
                         {{ $result->reference_low }} – {{ $result->reference_high }} {{ $result->value_unit }}
                     @else
                         —
@@ -68,16 +76,49 @@
                 </span>
             </div>
             <div>
-                <div class="text-slate-500 mb-1">Thời gian</div>
-                <div class="font-medium">{{ $result->resulted_at?->format('d/m/Y H:i') }}</div>
-            </div>
-            <div>
                 <div class="text-slate-500 mb-1">Trạng thái</div>
-                <span class="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                <span class="px-2 py-1 rounded-full text-xs font-medium
+                    {{ $result->status === 'final'       ? 'bg-green-100 text-green-700' :
+                       ($result->status === 'preliminary' ? 'bg-yellow-100 text-yellow-700' :
+                       ($result->status === 'cancelled'   ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600')) }}">
                     {{ ucfirst($result->status) }}
                 </span>
             </div>
+            <div>
+                <div class="text-slate-500 mb-1">Lần khám</div>
+                @if($result->encounter_id)
+                    <a href="{{ route('encounters.show', $result->encounter_id) }}" class="text-blue-600 hover:underline text-sm">
+                        Xem lần khám →
+                    </a>
+                @else
+                    <span class="text-slate-400">—</span>
+                @endif
+            </div>
         </div>
+
+        <div class="mt-5 pt-5 border-t border-slate-100 grid grid-cols-3 gap-6 text-sm">
+            <div>
+                <div class="text-slate-500 mb-1">Thu thập mẫu</div>
+                <div class="font-medium">{{ $result->collected_at?->format('d/m/Y H:i') ?? '—' }}</div>
+            </div>
+            <div>
+                <div class="text-slate-500 mb-1">Nhận mẫu</div>
+                <div class="font-medium">{{ $result->received_at?->format('d/m/Y H:i') ?? '—' }}</div>
+            </div>
+            <div>
+                <div class="text-slate-500 mb-1">Trả kết quả</div>
+                <div class="font-medium">{{ $result->resulted_at?->format('d/m/Y H:i') ?? '—' }}</div>
+            </div>
+        </div>
+
+        @if($result->order_id)
+            <div class="mt-5 pt-5 border-t border-slate-100 text-sm">
+                <div class="text-slate-500 mb-1">Lệnh xét nghiệm</div>
+                <a href="{{ route('orders.show', $result->order_id) }}" class="text-blue-600 hover:underline">
+                    Xem lệnh →
+                </a>
+            </div>
+        @endif
     </div>
 </div>
 @endsection
