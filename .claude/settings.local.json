@@ -21,7 +21,17 @@
       "Read(//run/user/1000/**)",
       "Read(//run/**)",
       "Bash(docker compose *)",
-      "Bash(docker-compose ps *)"
+      "Bash(docker-compose ps *)",
+      "Bash(xargs cat -n)",
+      "Bash(/usr/bin/docker compose *)",
+      "Bash(which podman *)",
+      "Read(//usr/**)",
+      "Read(//etc/**)",
+      "Bash(env)",
+      "Bash(php /home/deck/Downloads/healthcare/docker/healthcare/artisan migrate --path=database/migrations/2026_01_01_000020_create_permission_tables.php)",
+      "Bash(xargs ls -la)",
+      "Bash(xargs ls)",
+      "Bash(podman-compose ps *)"
     ]
   }
 }

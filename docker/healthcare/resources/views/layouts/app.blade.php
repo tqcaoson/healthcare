@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
 
@@ -15,7 +15,7 @@
     @vite(['resources/css/app.css'])
 
     <title>
-        @yield('page-title')
+        @yield('page-title', config('app.name'))
     </title>
 </head>
 
@@ -45,6 +45,8 @@
     </div>
 
     @vite(['resources/js/app.js'])
+
+    @stack('scripts')
 
 </body>
 </html>

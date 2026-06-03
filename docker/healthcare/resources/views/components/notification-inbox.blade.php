@@ -14,9 +14,13 @@
         </span>
     </div>
 
+    <div x-show="notifications.length === 0" class="text-center py-6 text-slate-400 text-sm">
+        Không có thông báo mới.
+    </div>
+
     <div class="space-y-3">
 
-        <template x-for="notification in notifications">
+        <template x-for="notification in notifications" :key="notification.id">
 
             <div
                 class="border rounded-xl p-3"

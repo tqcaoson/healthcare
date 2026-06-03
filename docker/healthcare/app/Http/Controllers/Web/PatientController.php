@@ -12,6 +12,8 @@ class PatientController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Patient::class);
+
         $query = Patient::with('currentDemographics')->active();
 
         if ($search = $request->input('search')) {
@@ -28,11 +30,14 @@ class PatientController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Patient::class);
+
         return view('patients.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Patient::class);
         $request->validate([
             'given_name'  => 'required|string|max:100',
             'family_name' => 'required|string|max:100',
@@ -67,12 +72,15 @@ class PatientController extends Controller
 
     public function show($id)
     {
-        $patient = Patient::with([
+        $patient = Patient::findOrFail($id);
+        $this->authorize('view', $patient);
+
+        $patient->load([
             'currentDemographics',
             'allergies',
             'conditions',
             'encounters' => fn($q) => $q->latest('period_start')->limit(10),
-        ])->findOrFail($id);
+        ]);
 
         return view('patients.show', compact('patient'));
     }
@@ -80,12 +88,15 @@ class PatientController extends Controller
     public function edit($id)
     {
         $patient = Patient::with('currentDemographics')->findOrFail($id);
+        $this->authorize('update', $patient);
+
         return view('patients.edit', compact('patient'));
     }
 
     public function update(Request $request, $id)
     {
         $patient = Patient::findOrFail($id);
+        $this->authorize('update', $patient);
 
         $request->validate([
             'given_name'  => 'required|string|max:100',
@@ -121,6 +132,7 @@ class PatientController extends Controller
     public function destroy($id)
     {
         $patient = Patient::findOrFail($id);
+        $this->authorize('delete', $patient);
         $patient->update(['status' => 'inactive']);
         $patient->delete();
 

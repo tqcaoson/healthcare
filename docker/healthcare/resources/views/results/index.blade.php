@@ -34,7 +34,7 @@
                 <option value="30" {{ request('days') == 30 ? 'selected' : '' }}>30 ngày qua</option>
                 <option value="90" {{ request('days') == 90 ? 'selected' : '' }}>90 ngày qua</option>
             </select>
-            <button type="submit" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-800">Lọc</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">🔍 Lọc</button>
         </div>
     </form>
 
@@ -98,7 +98,7 @@
                                     <span class="text-red-600 font-bold text-xs">⚠</span>
                                 @endif
                                 <span class="px-2 py-0.5 rounded text-xs font-medium {{ $flagColor }}">
-                                    {{ $result->abnormal_flag === 'null' ? 'N/A' : $result->abnormal_flag }}
+                                    {{ $result->abnormal_flag === null ? 'N/A' : $result->abnormal_flag }}
                                 </span>
                             </div>
                         </td>
@@ -111,9 +111,9 @@
                             </span>
                         </td>
                         <td class="px-5 py-3">
-                            <div class="flex gap-2">
-                                <a href="{{ route('results.show', $result->id) }}" class="text-blue-600 hover:underline text-xs">Xem</a>
-                                <a href="{{ route('results.edit', $result->id) }}" class="text-amber-600 hover:underline text-xs">Sửa</a>
+                            <div class="flex gap-3">
+                                <a href="{{ route('results.show', $result->id) }}" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2.5 py-1 rounded text-xs font-medium">Xem</a>
+                                <a href="{{ route('results.edit', $result->id) }}" class="bg-amber-100 text-amber-700 hover:bg-amber-200 px-2.5 py-1 rounded text-xs font-medium">Sửa</a>
                             </div>
                         </td>
                     </tr>

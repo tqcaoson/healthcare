@@ -64,7 +64,7 @@
                                    'N'=>'bg-green-100 text-green-700'];
                 @endphp
                 <span class="px-3 py-1 rounded-full text-sm font-bold {{ $flagColors[$result->abnormal_flag] ?? 'bg-slate-100 text-slate-600' }}">
-                    {{ $result->abnormal_flag === 'null' ? 'N/A' : $result->abnormal_flag }}
+                    {{ $result->abnormal_flag === null ? 'N/A' : $result->abnormal_flag }}
                 </span>
             </div>
             <div>

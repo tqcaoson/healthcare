@@ -27,8 +27,8 @@
                    placeholder="Tìm theo tên hoặc MRN..."
                    class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <button type="submit"
-                    class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-800">
-                Tìm kiếm
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                🔍 Tìm kiếm
             </button>
             @if(request('search'))
                 <a href="{{ route('patients.index') }}"
@@ -65,12 +65,12 @@
                             {{ $demo?->birth_date ? \Carbon\Carbon::parse($demo->birth_date)->format('d/m/Y') : '—' }}
                         </td>
                         <td class="px-5 py-3 text-slate-600">
-                            @match($demo?->gender)
-                                'male'    => 'Nam',
-                                'female'  => 'Nữ',
-                                'other'   => 'Khác',
-                                default   => '—',
-                            @endmatch
+                            {{ match($demo?->gender) {
+                                'male'   => 'Nam',
+                                'female' => 'Nữ',
+                                'other'  => 'Khác',
+                                default  => '—',
+                            } }}
                         </td>
                         <td class="px-5 py-3 text-slate-600">{{ $demo?->phone ?? '—' }}</td>
                         <td class="px-5 py-3">
@@ -80,16 +80,22 @@
                             </span>
                         </td>
                         <td class="px-5 py-3">
-                            <div class="flex gap-2">
+                            <div class="flex gap-3">
+                                @can('view', $patient)
                                 <a href="{{ route('patients.show', $patient->id) }}"
-                                   class="text-blue-600 hover:underline text-xs">Xem</a>
+                                   class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2.5 py-1 rounded text-xs font-medium">Xem</a>
+                                @endcan
+                                @can('update', $patient)
                                 <a href="{{ route('patients.edit', $patient->id) }}"
-                                   class="text-amber-600 hover:underline text-xs">Sửa</a>
+                                   class="bg-amber-100 text-amber-700 hover:bg-amber-200 px-2.5 py-1 rounded text-xs font-medium">Sửa</a>
+                                @endcan
+                                @can('delete', $patient)
                                 <form method="POST" action="{{ route('patients.destroy', $patient->id) }}"
                                       onsubmit="return confirm('Vô hiệu hoá bệnh nhân này?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:underline text-xs">Xoá</button>
+                                    <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 px-2.5 py-1 rounded text-xs font-medium">Xoá</button>
                                 </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

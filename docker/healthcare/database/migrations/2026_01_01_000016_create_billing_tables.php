@@ -21,6 +21,8 @@ return new class extends Migration
             $table->enum('status', ['billable','billed','not-billable','aborted'])->default('billable');
             $table->date('service_date');
             $table->unsignedBigInteger('billed_by');
+            $table->timestamps();
+            $table->softDeletes(); // PHI billing records must not be hard-deleted
         });
 
         Schema::create('claims', function (Blueprint $table) {

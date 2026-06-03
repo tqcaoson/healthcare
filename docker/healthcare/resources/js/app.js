@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 
+import auditExplorer from './stores/audit-explorer';
 import orderEntry from './stores/order-entry';
 import resultsViewer from './stores/results-viewer';
 import notificationInbox from './stores/notification-inbox';
@@ -38,6 +39,7 @@ import wcagPanel from './stores/wcag-panel';
 
 window.Alpine = Alpine;
 
+Alpine.data('auditExplorer', auditExplorer);
 Alpine.data('orderEntry', orderEntry);
 Alpine.data('resultsViewer', resultsViewer);
 Alpine.data('notificationInbox', notificationInbox);

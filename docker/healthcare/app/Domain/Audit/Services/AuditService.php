@@ -34,7 +34,11 @@ class AuditService
 
     private function computeHash(array $entry): string
     {
-        $lastHash = AuditLog::latest('id')->value('log_hash') ?? '';
+        // Lock the latest row to prevent concurrent requests from forking
+        // the hash chain and breaking tamper-evident integrity checks.
+        $lastHash = AuditLog::lockForUpdate()
+            ->latest('id')
+            ->value('log_hash') ?? '';
 
         return hash(
             'sha256',

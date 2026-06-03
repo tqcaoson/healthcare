@@ -16,12 +16,14 @@
             <input
                 x-model="filters.user"
                 class="form-input"
+                aria-label="Lọc theo người dùng"
                 placeholder="User"
             >
 
             <input
                 x-model="filters.resource"
                 class="form-input"
+                aria-label="Lọc theo resource"
                 placeholder="Resource"
             >
 
@@ -45,9 +47,17 @@
         </div>
     </div>
 
-    <div class="space-y-4">
+    <div x-show="loading" class="text-center py-10 text-slate-500">Đang tải...</div>
 
-        <template x-for="log in logs">
+    <div x-show="error" class="bg-red-50 text-red-700 rounded-2xl p-5" x-text="error"></div>
+
+    <div x-show="!loading && !error && logs.length === 0" class="bg-white rounded-2xl shadow-sm p-10 text-center text-slate-400">
+        Không có audit log phù hợp.
+    </div>
+
+    <div class="space-y-4" x-show="!loading && logs.length > 0">
+
+        <template x-for="log in logs" :key="log.id">
 
             <div class="bg-white rounded-2xl shadow-sm p-5">
 

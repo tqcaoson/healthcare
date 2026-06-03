@@ -34,7 +34,7 @@
                 <option value="7"  {{ request('days', 7) == 7 ? 'selected' : '' }}>7 ngày qua</option>
                 <option value="30" {{ request('days') == 30 ? 'selected' : '' }}>30 ngày qua</option>
             </select>
-            <button type="submit" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-800">Lọc</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">🔍 Lọc</button>
         </div>
     </form>
 
@@ -53,6 +53,7 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($administrations as $admin)
+                    @can('view', $admin->patient ?? \App\Domain\Patient\Models\Patient::class)
                     @php $demo = $admin->patient?->currentDemographics; @endphp
                     <tr class="hover:bg-slate-50">
                         <td class="px-5 py-3">
@@ -83,9 +84,10 @@
                             @endif
                         </td>
                         <td class="px-5 py-3">
-                            <a href="{{ route('medications.show', $admin->id) }}" class="text-blue-600 hover:underline text-xs">Xem</a>
+                            <a href="{{ route('medications.show', $admin->id) }}" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2.5 py-1 rounded text-xs font-medium">Xem</a>
                         </td>
                     </tr>
+                    @endcan
                 @empty
                     <tr>
                         <td colspan="7" class="px-5 py-10 text-center text-slate-400">

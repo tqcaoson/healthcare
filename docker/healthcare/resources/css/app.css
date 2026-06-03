@@ -1,13 +1,13 @@
+@import './components.css';
+@import './dark-mode.css';
+@import './accessibility.css';
+@import './print.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 [x-cloak] { display: none !important; }
-
-@import './components.css';
-@import './dark-mode.css';
-@import './accessibility.css';
-@import './print.css';
 
 body {
     @apply text-slate-800;
@@ -24,13 +24,41 @@ body {
 .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700
            text-white px-5 py-3 rounded-xl
-           transition-all;
+           transition-all
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600;
+}
+
+.btn-secondary {
+    @apply bg-slate-200 hover:bg-slate-300
+           text-slate-800 px-5 py-3 rounded-xl
+           transition-all
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700
+           text-white px-4 py-2 rounded-xl text-sm
+           transition-all
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600
+           disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700
+           text-white px-4 py-2 rounded-xl text-sm
+           transition-all
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600
+           disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .sidebar-link {
-    @apply block px-4 py-3 rounded-xl
-           hover:bg-slate-800
+    @apply block px-4 py-3 rounded-xl text-slate-300
+           hover:bg-slate-800 hover:text-white
            transition-all;
+}
+
+.sidebar-link.active {
+    @apply bg-blue-600 text-white font-semibold;
 }
 
 .verification-row {

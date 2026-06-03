@@ -42,16 +42,30 @@
             <div class="space-y-2">
                 @php $maxCount = $encountersTrend->max('count') ?: 1; @endphp
                 @foreach($encountersTrend as $day)
+                    @php
+                        $isToday = \Carbon\Carbon::parse($day['date'])->isToday();
+                        $hasData = $day['count'] > 0;
+                        $pct     = $hasData ? max(4, round($day['count'] / $maxCount * 100)) : 0;
+                    @endphp
                     <div class="flex items-center gap-3 text-sm">
-                        <div class="w-20 text-slate-500 text-xs">
+                        <div class="w-20 text-xs {{ $isToday ? 'text-blue-600 font-semibold' : 'text-slate-500' }}">
                             {{ \Carbon\Carbon::parse($day['date'])->format('d/m') }}
+                            @if($isToday)<span class="text-blue-400"> ●</span>@endif
                         </div>
-                        <div class="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
-                            <div class="bg-blue-500 h-full rounded-full"
-                                 style="width: {{ $maxCount > 0 ? round($day['count'] / $maxCount * 100) : 0 }}%">
-                            </div>
+                        <div class="flex-1 rounded-full h-5 overflow-hidden {{ $hasData ? 'bg-blue-100' : 'bg-slate-100' }}">
+                            @if($hasData)
+                                <div class="bg-blue-500 h-full rounded-full flex items-center justify-end pr-2 transition-all"
+                                     style="width: {{ $pct }}%">
+                                </div>
+                            @else
+                                <div class="h-full flex items-center pl-3">
+                                    <span class="text-xs text-slate-400 italic">Không có dữ liệu</span>
+                                </div>
+                            @endif
                         </div>
-                        <div class="w-8 text-right font-semibold">{{ $day['count'] }}</div>
+                        <div class="w-8 text-right text-xs font-semibold {{ $hasData ? 'text-slate-800' : 'text-slate-300' }}">
+                            {{ $hasData ? $day['count'] : '—' }}
+                        </div>
                     </div>
                 @endforeach
             </div>

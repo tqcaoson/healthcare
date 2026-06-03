@@ -20,9 +20,10 @@
     <form method="POST" action="{{ route('medications.store') }}" class="bg-white rounded-xl shadow-sm p-6 space-y-5">
         @csrf
 
+        {{-- Patient --}}
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Bệnh nhân *</label>
-            <select name="patient_id"
+            <select id="patient_id" name="patient_id"
                     class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required>
                 <option value="">-- Chọn bệnh nhân --</option>
@@ -35,6 +36,27 @@
             </select>
         </div>
 
+        {{-- Encounter --}}
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Lần khám (Encounter) *</label>
+            <select id="encounter_id" name="encounter_id"
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <option value="">-- Chọn bệnh nhân trước --</option>
+            </select>
+        </div>
+
+        {{-- Order --}}
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Lệnh thuốc (Order) *</label>
+            <select id="order_id" name="order_id"
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <option value="">-- Chọn bệnh nhân trước --</option>
+            </select>
+        </div>
+
+        {{-- Drug info --}}
         <div class="grid grid-cols-2 gap-5">
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Tên thuốc *</label>
@@ -68,12 +90,12 @@
                 <select name="route"
                         class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required>
-                    <option value="oral"     {{ old('route', 'oral') === 'oral'     ? 'selected' : '' }}>Uống (oral)</option>
-                    <option value="IV"       {{ old('route') === 'IV'       ? 'selected' : '' }}>Tiêm tĩnh mạch (IV)</option>
-                    <option value="IM"       {{ old('route') === 'IM'       ? 'selected' : '' }}>Tiêm bắp (IM)</option>
-                    <option value="SC"       {{ old('route') === 'SC'       ? 'selected' : '' }}>Tiêm dưới da (SC)</option>
-                    <option value="topical"  {{ old('route') === 'topical'  ? 'selected' : '' }}>Bôi ngoài da</option>
-                    <option value="inhaled"  {{ old('route') === 'inhaled'  ? 'selected' : '' }}>Hít</option>
+                    <option value="oral"    {{ old('route', 'oral') === 'oral'    ? 'selected' : '' }}>Uống (oral)</option>
+                    <option value="IV"      {{ old('route') === 'IV'      ? 'selected' : '' }}>Tiêm tĩnh mạch (IV)</option>
+                    <option value="IM"      {{ old('route') === 'IM'      ? 'selected' : '' }}>Tiêm bắp (IM)</option>
+                    <option value="SC"      {{ old('route') === 'SC'      ? 'selected' : '' }}>Tiêm dưới da (SC)</option>
+                    <option value="topical" {{ old('route') === 'topical' ? 'selected' : '' }}>Bôi ngoài da</option>
+                    <option value="inhaled" {{ old('route') === 'inhaled' ? 'selected' : '' }}>Hít</option>
                 </select>
             </div>
         </div>
@@ -108,4 +130,58 @@
         </div>
     </form>
 </div>
+
+<script>
+(function () {
+    var patientSel   = document.getElementById('patient_id');
+    var encounterSel = document.getElementById('encounter_id');
+    var orderSel     = document.getElementById('order_id');
+
+    var allEncounters = @json($encountersJson);
+    var allOrders     = @json($ordersJson);
+
+    var oldEncounter = '{{ old('encounter_id') }}';
+    var oldOrder     = '{{ old('order_id') }}';
+
+    function rebuildSelect(sel, items, selectedId, emptyLabel) {
+        sel.innerHTML = '';
+        var ph = document.createElement('option');
+        ph.value = '';
+        ph.textContent = emptyLabel;
+        sel.appendChild(ph);
+
+        items.forEach(function (item) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.label;
+            if (String(item.id) === String(selectedId)) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    function onPatientChange(patientId, restoreEnc, restoreOrd) {
+        if (!patientId) {
+            rebuildSelect(encounterSel, [], null, '-- Chọn bệnh nhân trước --');
+            rebuildSelect(orderSel,     [], null, '-- Chọn bệnh nhân trước --');
+            return;
+        }
+
+        var encs  = allEncounters.filter(function (e) { return e.patient_id === String(patientId); });
+        var ords  = allOrders.filter(function (o)     { return o.patient_id === String(patientId); });
+
+        rebuildSelect(encounterSel, encs, restoreEnc || null, encs.length ? '-- Chọn encounter --' : 'Không có encounter phù hợp');
+        rebuildSelect(orderSel,     ords, restoreOrd || null, ords.length ? '-- Chọn lệnh thuốc --' : 'Không có lệnh thuốc (medication) đang active/pending');
+    }
+
+    patientSel.addEventListener('change', function () {
+        onPatientChange(this.value, null, null);
+    });
+
+    // Restore state after validation failure
+    var savedPatient = '{{ old('patient_id') }}';
+    if (savedPatient) {
+        onPatientChange(savedPatient, oldEncounter, oldOrder);
+    }
+})();
+</script>
 @endsection

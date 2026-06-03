@@ -7,37 +7,33 @@ use App\Models\User;
 
 class PatientPolicy
 {
-    public function viewAny(User $user): bool
+    private function canAccessPatients(User $user): bool
     {
-        return $user->can('patients.view');
+        return in_array($user->role, ['admin', 'doctor', 'nurse', 'clerk', 'pharmacist']);
     }
 
-    public function view(
-        User $user,
-        Patient $patient
-    ): bool {
+    public function viewAny(User $user): bool
+    {
+        return $this->canAccessPatients($user);
+    }
 
-        return $user->can('patients.view');
+    public function view(User $user, Patient $patient): bool
+    {
+        return $this->canAccessPatients($user);
     }
 
     public function create(User $user): bool
     {
-        return $user->can('patients.create');
+        return in_array($user->role, ['admin', 'doctor', 'clerk']);
     }
 
-    public function update(
-        User $user,
-        Patient $patient
-    ): bool {
-
-        return $user->can('patients.update');
+    public function update(User $user, Patient $patient): bool
+    {
+        return in_array($user->role, ['admin', 'doctor', 'clerk']);
     }
 
-    public function delete(
-        User $user,
-        Patient $patient
-    ): bool {
-
-        return $user->can('patients.delete');
+    public function delete(User $user, Patient $patient): bool
+    {
+        return in_array($user->role, ['admin']);
     }
 }

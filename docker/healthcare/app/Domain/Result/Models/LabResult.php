@@ -29,10 +29,11 @@ class LabResult extends PhiModel
     ];
 
     protected $casts = [
+        'value_string' => 'encrypted', // PHI narrative — must be encrypted at rest
         'collected_at' => 'datetime',
-        'received_at' => 'datetime',
-        'resulted_at' => 'datetime',
-        'is_critical' => 'boolean',
+        'received_at'  => 'datetime',
+        'resulted_at'  => 'datetime',
+        'is_critical'  => 'boolean',
     ];
 
     public function patient(): BelongsTo

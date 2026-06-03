@@ -30,7 +30,7 @@
             </select>
             <input type="date" name="date" value="{{ request('date') }}"
                    class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button type="submit" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-800">Lọc</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">🔍 Lọc</button>
             @if(request()->hasAny(['status','date']))
                 <a href="{{ route('appointments.index') }}" class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm hover:bg-slate-50">Xoá lọc</a>
             @endif
@@ -72,13 +72,13 @@
                             </span>
                         </td>
                         <td class="px-5 py-3">
-                            <div class="flex gap-2">
-                                <a href="{{ route('appointments.show', $appt->id) }}" class="text-blue-600 hover:underline text-xs">Xem</a>
-                                <a href="{{ route('appointments.edit', $appt->id) }}" class="text-amber-600 hover:underline text-xs">Sửa</a>
+                            <div class="flex gap-3">
+                                <a href="{{ route('appointments.show', $appt->id) }}" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2.5 py-1 rounded text-xs font-medium">Xem</a>
+                                <a href="{{ route('appointments.edit', $appt->id) }}" class="bg-amber-100 text-amber-700 hover:bg-amber-200 px-2.5 py-1 rounded text-xs font-medium">Sửa</a>
                                 <form method="POST" action="{{ route('appointments.destroy', $appt->id) }}"
                                       onsubmit="return confirm('Huỷ lịch hẹn này?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:underline text-xs">Huỷ</button>
+                                    <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 px-2.5 py-1 rounded text-xs font-medium">Huỷ</button>
                                 </form>
                             </div>
                         </td>

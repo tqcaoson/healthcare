@@ -54,7 +54,7 @@ class OrderController extends Controller
     public function update(Request $request, Order $order): JsonResponse
     {
         $validated = $request->validate([
-            'status' => 'sometimes|string',
+            'status'   => 'sometimes|in:pending,active,completed,cancelled,on-hold,entered-in-error',
             'priority' => 'sometimes|in:routine,urgent,stat,asap',
         ]);
 
