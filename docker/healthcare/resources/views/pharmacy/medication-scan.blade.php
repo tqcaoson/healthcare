@@ -167,6 +167,7 @@
             {{-- Barcode input (manual fallback + camera) --}}
             <div
                 x-data="barcodeScanner"
+                x-bind:data-step="step"
                 class="bg-black rounded-2xl overflow-hidden relative"
             >
                 <video
@@ -181,7 +182,7 @@
 
                 <div class="absolute bottom-4 left-4 right-4 space-y-2">
                     <div class="bg-white/90 backdrop-blur rounded-xl px-4 py-2.5 text-center text-sm font-semibold text-gray-800">
-                        <span x-text="result || ($parent.step === 'scanning-patient' ? 'Quét vòng tay bệnh nhân...' : 'Quét hộp/lọ thuốc...')"></span>
+                        <span x-text="result || ($el.closest('[data-step]').dataset.step === 'scanning-patient' ? 'Quét vòng tay bệnh nhân...' : 'Quét hộp/lọ thuốc...')"></span>
                     </div>
 
                     {{-- Manual input --}}
@@ -190,9 +191,9 @@
                         placeholder="Hoặc nhập barcode thủ công, nhấn Enter"
                         class="w-full bg-white/90 backdrop-blur rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         @keydown.enter="
-                            if ($parent.step === 'scanning-patient') {
+                            if ($el.closest('[data-step]').dataset.step === 'scanning-patient') {
                                 $dispatch('patient-scan', { barcode: $el.value });
-                            } else if ($parent.step === 'scanning-medication') {
+                            } else if ($el.closest('[data-step]').dataset.step === 'scanning-medication') {
                                 $dispatch('medication-scan', { barcode: $el.value });
                             }
                             $el.value = '';
