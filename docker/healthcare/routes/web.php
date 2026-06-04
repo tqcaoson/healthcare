@@ -19,6 +19,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('medications/{id}', [\App\Http\Controllers\Web\MedicationController::class, 'show'])->name('medications.show');
 
     Route::get('reports', [\App\Http\Controllers\Web\ReportController::class, 'index'])->name('reports.index');
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('audit-logs', [\App\Http\Controllers\Web\AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Web\AuditLogController::class, 'show'])->name('audit-logs.show');
+
+        Route::resource('users', \App\Http\Controllers\Web\UserController::class)
+            ->except(['show']);
+    });
 });
 
 Route::redirect('/', '/dashboard');
