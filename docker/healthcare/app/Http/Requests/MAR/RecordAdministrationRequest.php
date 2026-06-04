@@ -8,7 +8,7 @@ class RecordAdministrationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array($this->user()->role, ['nurse', 'physician', 'superadmin']);
+        return in_array($this->user()->role, ['nurse', 'physician', 'admin', 'superadmin']);
     }
 
     public function rules(): array

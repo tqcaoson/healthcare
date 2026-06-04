@@ -88,11 +88,17 @@
         @endforelse
     </div>
 
-    <div class="flex gap-3">
+    <div class="flex gap-3 flex-wrap">
         <a href="{{ route('orders.create') }}?encounter_id={{ $encounter->id }}"
            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
             + Đặt lệnh (Orders)
         </a>
+        @if(in_array(auth()->user()->role, ['nurse', 'physician', 'pharmacist', 'superadmin', 'admin']))
+        <a href="{{ route('pharmacy.medication-scan') }}?encounter_id={{ $encounter->id }}"
+           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            💊 MAR Scan — Phát thuốc
+        </a>
+        @endif
         <a href="{{ route('results.index') }}"
            class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm hover:bg-slate-50">
             Xem kết quả xét nghiệm

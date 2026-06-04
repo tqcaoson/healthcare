@@ -271,20 +271,8 @@ class MARScanTest extends TestCase
         ]);
     }
 
-    public function test_physician_cannot_administer_medication(): void
+    public function test_pharmacist_cannot_administer_medication(): void
     {
-        $physician = User::create([
-            'uuid' => (string) str()->uuid(),
-            'username' => 'doc_test',
-            'email' => 'doc@test.com',
-            'password' => bcrypt('password'),
-            'role' => 'physician',
-            'mfa_enabled' => false,
-            'status' => 'active',
-        ]);
-
-        // physician IS allowed per RecordAdministrationRequest (physician + nurse)
-        // This test verifies pharmacist cannot record administration
         $pharmacist = User::create([
             'uuid' => (string) str()->uuid(),
             'username' => 'pharm_test',
@@ -295,7 +283,7 @@ class MARScanTest extends TestCase
             'status' => 'active',
         ]);
 
-        $this->actingAs($pharmacist)
+        $this->actingAs($pharmacist) // pharmacist không có quyền ghi nhận phát thuốc
             ->postJson('/api/v1/mar/administer', [
                 'order_id' => $this->order->id,
                 'patient_id' => $this->patient->id,

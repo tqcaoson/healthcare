@@ -11,7 +11,7 @@ class PharmacyController extends Controller
     public function medicationScan(Request $request)
     {
         abort_unless(
-            in_array(auth()->user()->role, ['nurse', 'physician', 'superadmin']),
+            in_array(auth()->user()->role, ['nurse', 'physician', 'admin', 'superadmin']),
             403,
             'Chỉ điều dưỡng và bác sĩ có thể thực hiện phát thuốc tại giường.'
         );
