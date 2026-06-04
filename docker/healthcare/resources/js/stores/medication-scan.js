@@ -30,8 +30,14 @@ export default () => ({
 
     // --- Lifecycle ---
     async init() {
-        // encounterId & patientId are pre-set by x-init in the blade template.
-        // Listen for barcode events emitted by manual input / camera component.
+        const el = this.$el;
+        const eid = parseInt(el.dataset.encounterId);
+        const pid = parseInt(el.dataset.patientId);
+        if (eid) this.encounterId = eid;
+        if (pid) this.patientId = pid;
+
+        if (this.encounterId) await this.loadSchedule();
+
         window.addEventListener('patient-scan-internal', async (e) => {
             await this.onPatientScan(e.detail.barcode);
         });

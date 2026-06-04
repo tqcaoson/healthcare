@@ -19,11 +19,20 @@ class PharmacyController extends Controller
         $encounterId = $request->integer('encounter_id') ?: null;
 
         $encounter = null;
+        $encounterError = null;
         if ($encounterId) {
             $encounter = Encounter::with('patient.currentDemographics')
                 ->where('id', $encounterId)
                 ->whereIn('status', ['in-progress', 'arrived'])
-                ->firstOrFail();
+                ->first();
+
+            if (! $encounter) {
+                $raw = Encounter::find($encounterId);
+                $encounterError = $raw
+                    ? "Lần khám #{$encounterId} có trạng thái '{$raw->status}' — chỉ có thể phát thuốc cho lần khám đang hoạt động (in-progress / arrived)."
+                    : "Không tìm thấy lần khám #{$encounterId}.";
+                $encounterId = null;
+            }
         }
 
         // Active inpatient/emergency encounters for the dropdown selector
@@ -41,6 +50,6 @@ class PharmacyController extends Controller
                 'patient_id' => $e->patient_id,
             ]);
 
-        return view('pharmacy.medication-scan', compact('encounter', 'activeEncounters', 'encounterId'));
+        return view('pharmacy.medication-scan', compact('encounter', 'activeEncounters', 'encounterId', 'encounterError'));
     }
 }

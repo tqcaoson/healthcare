@@ -6,11 +6,8 @@
 
 <div
     x-data="medicationScan"
-    x-init="
-        encounterId = {{ $encounterId ?? 'null' }};
-        patientId   = {{ $encounter?->patient_id ?? 'null' }};
-        if (encounterId) loadSchedule();
-    "
+    data-encounter-id="{{ $encounterId ?? '' }}"
+    data-patient-id="{{ $encounter?->patient_id ?? '' }}"
     class="space-y-6"
 >
 
@@ -29,6 +26,13 @@
             </div>
         @endif
     </div>
+
+    {{-- ── Error (encounter không hợp lệ) ── --}}
+    @if(!empty($encounterError))
+    <div class="bg-red-50 border border-red-200 rounded-2xl px-6 py-4 text-sm text-red-700 font-medium">
+        ⚠ {{ $encounterError }}
+    </div>
+    @endif
 
     {{-- ── Encounter selector (khi chưa chọn encounter) ── --}}
     @unless($encounter)
@@ -177,7 +181,7 @@
 
                 <div class="absolute bottom-4 left-4 right-4 space-y-2">
                     <div class="bg-white/90 backdrop-blur rounded-xl px-4 py-2.5 text-center text-sm font-semibold text-gray-800">
-                        <span x-text="result || (step === 'scanning-patient' ? 'Quét vòng tay bệnh nhân...' : 'Quét hộp/lọ thuốc...')"></span>
+                        <span x-text="result || ($parent.step === 'scanning-patient' ? 'Quét vòng tay bệnh nhân...' : 'Quét hộp/lọ thuốc...')"></span>
                     </div>
 
                     {{-- Manual input --}}
@@ -186,9 +190,9 @@
                         placeholder="Hoặc nhập barcode thủ công, nhấn Enter"
                         class="w-full bg-white/90 backdrop-blur rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         @keydown.enter="
-                            if (step === 'scanning-patient') {
+                            if ($parent.step === 'scanning-patient') {
                                 $dispatch('patient-scan', { barcode: $el.value });
-                            } else if (step === 'scanning-medication') {
+                            } else if ($parent.step === 'scanning-medication') {
                                 $dispatch('medication-scan', { barcode: $el.value });
                             }
                             $el.value = '';

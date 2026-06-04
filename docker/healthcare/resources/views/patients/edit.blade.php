@@ -91,7 +91,7 @@
                     <div class="col-md-6">
                         <label class="form-label fw-medium">Ngày sinh <span class="text-danger">*</span></label>
                         <input type="date" name="birth_date"
-                               value="{{ old('birth_date', $demo?->birth_date) }}"
+                               value="{{ old('birth_date', $demo?->birth_date?->format('Y-m-d')) }}"
                                class="form-control @error('birth_date') is-invalid @enderror"
                                required>
                         @error('birth_date')

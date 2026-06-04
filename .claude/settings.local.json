@@ -36,7 +36,8 @@
       "Bash(php -l /home/deck/Downloads/healthcare/docker/healthcare/app/Http/Controllers/DashboardController.php)",
       "Bash(php -l /home/deck/Downloads/healthcare/docker/healthcare/app/Services/Analytics/DashboardService.php)",
       "Bash(find /usr /opt /app -name php -type f 2>/dev/null | head -5)",
-      "Read(//opt/**)"
+      "Read(//opt/**)",
+      "Bash(xargs cat)"
     ]
   }
 }
