@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AllergyController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\EncounterController;
+use App\Http\Controllers\Api\V1\MARScanController;
 use App\Http\Controllers\Api\V1\MedicationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PatientController;
@@ -28,6 +29,14 @@ Route::prefix('v1')
         Route::apiResource('results', ResultController::class);
 
         Route::apiResource('medications', MedicationController::class);
+
+        // MAR Scan — Medication Administration Record with barcode verification
+        Route::prefix('mar')->name('mar.')->group(function () {
+            Route::get('schedule', [MARScanController::class, 'schedule'])->name('schedule');
+            Route::post('scan/patient', [MARScanController::class, 'scanPatient'])->name('scan.patient');
+            Route::post('scan/medication', [MARScanController::class, 'scanMedication'])->name('scan.medication');
+            Route::post('administer', [MARScanController::class, 'administer'])->name('administer');
+        });
 
         Route::apiResource('vital-signs', VitalSignController::class);
 

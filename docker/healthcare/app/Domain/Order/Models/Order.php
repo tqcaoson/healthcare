@@ -7,6 +7,7 @@ use App\Domain\Encounter\Models\Encounter;
 use App\Domain\Patient\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends PhiModel
 {
@@ -46,5 +47,10 @@ class Order extends PhiModel
     public function encounter(): BelongsTo
     {
         return $this->belongsTo(Encounter::class);
+    }
+
+    public function medicationOrder(): HasOne
+    {
+        return $this->hasOne(MedicationOrder::class);
     }
 }

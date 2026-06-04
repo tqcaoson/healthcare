@@ -251,30 +251,179 @@ Xem lịch sử phát thuốc (MAR — Medication Administration Record): ai ph�
 
 ---
 
-## 8. Phát thuốc tại giường — Medication Scan
+## 8. Phát thuốc tại giường — MAR Scan
 
-**URL:** `/pharmacy/medication-scan` (hoặc nút từ MAR)
+**URL giao diện:** `/pharmacy/medication-scan?encounter_id={id}`
 
-> Dành cho điều dưỡng/dược sĩ thực hiện tại giường bệnh.  
-> Áp dụng quy tắc **5 Rights** (đúng bệnh nhân, đúng thuốc, đúng liều, đúng đường, đúng giờ).
+> **Quyền truy cập:** Điều dưỡng (`nurse`), Bác sĩ (`physician`), Quản trị (`superadmin`).  
+> Dược sĩ chỉ xem MAR, không ghi nhận phát thuốc trực tiếp tại giường.
 
-**Quy trình:**
+Tính năng áp dụng **5 Rights** (đúng bệnh nhân · đúng thuốc · đúng liều · đúng đường dùng · đúng giờ) thông qua quét barcode bằng camera thiết bị.
 
-1. **Quét mã vạch bệnh nhân** — vòng đeo tay hoặc thẻ MRN
-2. **Quét mã vạch thuốc** — barcode trên hộp/lọ thuốc
-3. Hệ thống kiểm tra 4 tiêu chí:
+---
 
-| Tiêu chí | Kết quả |
+### 8.1 Giao diện tổng quan
+
+Màn hình chia 2 cột:
+
+```
+┌─────────────────────────────┬──────────────────────────────┐
+│   Camera / Barcode Scanner  │       Verification Panel     │
+│                             │                              │
+│   ┌─────────────────────┐   │  Patient Match     [✓ / ✗]  │
+│   │  [khung đỏ quét mã] │   │  Medication Match  [✓ / ✗]  │
+│   └─────────────────────┘   │  Dose Match        [✓ / ✗]  │
+│                             │  Schedule Match    [✓ / ✗]  │
+│   Waiting for scan...       │                              │
+│                             │  ⚠ (cảnh báo nếu có ✗)     │
+│                             │                              │
+│                             │  [ Administer Medication ]   │
+│                             │   (khả dụng khi tất cả ✓)   │
+└─────────────────────────────┴──────────────────────────────┘
+```
+
+---
+
+### 8.2 Quy trình từng bước
+
+#### Bước 1 — Mở MAR Schedule
+
+Truy cập `/pharmacy/medication-scan?encounter_id=<id>` hoặc nhấn nút **MAR Scan** từ trang chi tiết lần khám.
+
+Hệ thống tự động tải danh sách thuốc đang active của lần khám, hiển thị:
+
+| Cột | Ý nghĩa |
 |---|---|
-| Patient Match | ✓ / ✗ |
-| Medication Match | ✓ / ✗ |
-| Dose Match | ✓ / ✗ |
-| Schedule Match | ✓ / ✗ |
+| Tên thuốc / Liều | drug_name + dose_value + dose_unit + route |
+| Tần suất | frequency (BID, TID, q8h...) |
+| Dược sĩ xác nhận | ✓ nếu đã `verified_by_pharmacist` |
+| Trạng thái | **DUE** (đến giờ) · **OVERDUE** (quá giờ) · chờ |
+| Lần phát gần nhất | administered_at của MAR record cuối |
 
-4. **Nếu tất cả ✓** → nút **Administer Medication** được kích hoạt
-5. Nhấn **Administer Medication** → hệ thống ghi nhận vào MAR, lưu audit log
+Nhấn **Chọn** trên dòng thuốc cần phát → chuyển sang Bước 2.
 
-> **Nếu có ✗** → xuất hiện cảnh báo đỏ "Không thể cho thuốc" — điều dưỡng cần kiểm tra lại và liên hệ dược sĩ.
+#### Bước 2 — Quét vòng tay bệnh nhân (Right Patient)
+
+Camera bật lên, hướng vào **vòng đeo tay** hoặc **thẻ MRN** của bệnh nhân.
+
+- Barcode được đọc → hệ thống gọi `POST /api/v1/mar/scan/patient`
+- **Nếu MRN khớp** → `Patient Match ✓` (xanh), chuyển sang quét thuốc
+- **Nếu sai MRN** → cảnh báo đỏ _"Patient identity mismatch — barcode không khớp"_ — **dừng lại**, xác nhận lại bệnh nhân
+
+> **Lý do quan trọng:** Bước này ngăn phát thuốc nhầm người. Sai ở đây → toàn bộ flow bị chặn.
+
+#### Bước 3 — Quét hộp thuốc (Right Medication)
+
+Sau khi `Patient Match ✓`, hướng camera vào **barcode GS1/DataMatrix** trên hộp hoặc lọ thuốc.
+
+Hỗ trợ 3 định dạng barcode:
+
+| Định dạng | Ví dụ | Cách nhận dạng |
+|---|---|---|
+| GS1-128 với AI (01) | `(01)00861004123456` | GTIN-14 → trích NDC |
+| RxNorm code thuần | `861004` | Chuỗi 5–9 chữ số |
+| Tên thuốc (fallback) | `Metformin` | So khớp drug_name |
+
+- **Nếu khớp order** → `Medication Match ✓` + `Dose Match ✓` (xanh)
+- Nếu order đến giờ phát → `Schedule Match ✓`
+- Nếu ngoài cửa sổ ±60 phút → `Schedule Match ✗` nhưng **không bị chặn** — hệ thống ghi chú deviation trong MAR
+
+#### Bước 4 — Xác nhận phát thuốc
+
+Khi **cả 4 tiêu chí ✓**, nút **Administer Medication** chuyển sang màu xanh và có thể nhấn.
+
+Nhấn nút:
+1. Hệ thống gọi `POST /api/v1/mar/administer`
+2. Ghi nhận `MedicationAdministration` với flag `patient_verified_by_barcode = true`, `medication_verified_by_barcode = true`
+3. Audit log ghi sự kiện `medication.administered` (người dùng, bệnh nhân, thuốc, liều, giờ)
+4. Event `MedicationAdministered` dispatch → listener trừ tồn kho (`DeductMedicationInventory`)
+5. Màn hình hiển thị thông báo xanh: _"Đã phát thuốc [Tên thuốc] thành công lúc [giờ]"_
+6. MAR Schedule tự động reload — dòng thuốc vừa phát cập nhật "Lần phát gần nhất"
+
+---
+
+### 8.3 Các trường hợp đặc biệt
+
+#### Thuốc PRN (khi cần)
+
+Nếu order có `is_prn = true`, trước khi nhấn **Administer** cần nhập thêm:
+- **Chỉ định dùng PRN** (prn_indication): ví dụ _"Đau mức 7/10 sau phẫu thuật"_
+
+Trường này bắt buộc — hệ thống từ chối nếu bỏ trống.
+
+#### Thuốc có wasted amount (hủy phần thừa)
+
+Nếu liều phải hủy (ví dụ chia lọ thuốc gây nghiện), điền thêm:
+- **Lượng hủy** (wasted_amount)
+- **Người chứng kiến** (waste_witnessed_by) — bắt buộc điền user ID người chứng kiến
+
+#### Phát ngoài giờ (Late Administration)
+
+Nếu `Schedule Match ✗` nhưng điều dưỡng vẫn phát:
+- Hệ thống vẫn cho phép nhấn **Administer Medication**
+- Ghi chú tự động thêm vào trường `notes`: `[LATE: administered outside scheduled window]`
+- Báo cáo sai lệch giờ phát có thể xem tại `/reports/medication-errors`
+
+---
+
+### 8.4 API endpoints (dành cho tích hợp / mobile)
+
+| Method | Endpoint | Mô tả |
+|--------|----------|--------|
+| `GET` | `/api/v1/mar/schedule?encounter_id=X` | Lịch phát thuốc của lần khám |
+| `POST` | `/api/v1/mar/scan/patient` | Xác minh barcode bệnh nhân |
+| `POST` | `/api/v1/mar/scan/medication` | Xác minh barcode thuốc |
+| `POST` | `/api/v1/mar/administer` | Ghi nhận phát thuốc (5 Rights) |
+
+Tất cả yêu cầu header `Authorization: Bearer {token}` (Sanctum) và middleware `audit.phi`.
+
+**Ví dụ — Xác minh bệnh nhân:**
+```http
+POST /api/v1/mar/scan/patient
+Content-Type: application/json
+
+{
+  "barcode": "MRN-2024-0042",
+  "patient_id": 7
+}
+```
+```json
+{
+  "verified": true,
+  "patient": { "id": 7, "mrn": "MRN-2024-0042", "uuid": "..." }
+}
+```
+
+**Ví dụ — Ghi nhận phát thuốc:**
+```http
+POST /api/v1/mar/administer
+Content-Type: application/json
+
+{
+  "order_id": 15,
+  "patient_id": 7,
+  "encounter_id": 3,
+  "patient_barcode": "MRN-2024-0042",
+  "medication_barcode": "861004",
+  "drug_name": "Metformin 500mg",
+  "rxnorm_code": "861004",
+  "dose_value": 500,
+  "dose_unit": "mg",
+  "route": "oral"
+}
+```
+```json
+{
+  "data": {
+    "uuid": "...",
+    "drug_name": "Metformin 500mg",
+    "administered_at": "2026-06-04T08:30:00+07:00",
+    "patient_verified_by_barcode": true,
+    "medication_verified_by_barcode": true,
+    "status": "completed"
+  }
+}
+```
 
 ---
 
@@ -372,11 +521,13 @@ Dưới đây là luồng hoàn chỉnh cho một ca điều trị nội trú đ
       │         │                                └── nếu critical → thông báo tự động
       │         │
       │         └── lệnh `medication` ──► [Kê đơn thuốc] (/medications)
-      │                                         │
+      │                                         │  (dược sĩ verify order)
       │                                         ▼
-      │                               [Phát thuốc tại giường]
-      │                               (/pharmacy/medication-scan)
-      │                               quét barcode → xác minh 5 Rights → ghi MAR
+      │                               [MAR Schedule]
+      │                               (/pharmacy/medication-scan?encounter_id=X)
+      │                               chọn thuốc → Bước 1: quét vòng tay → Patient Match ✓
+      │                                                    Bước 2: quét hộp thuốc → Med/Dose/Schedule ✓
+      │                                                    Bước 3: [Administer] → ghi MAR + audit + tồn kho
       │
       ├──► [Lịch hẹn tái khám] (/appointments/create)
       │
@@ -397,11 +548,12 @@ Dưới đây là luồng hoàn chỉnh cho một ca điều trị nội trú đ
 | Đặt lệnh CPOE | ✓ | — | — | ✓ |
 | Nhập kết quả xét nghiệm | — | ✓ | — | ✓ |
 | Kê đơn thuốc | ✓ | — | ✓ | ✓ |
-| Phát thuốc (MAR Scan) | — | ✓ | ✓ | ✓ |
+| Xem MAR Schedule | — | ✓ | ✓ | ✓ |
+| Phát thuốc (MAR Scan) | ✓ | ✓ | — | ✓ |
 | Xem Audit Log | — | — | — | ✓ |
 | Quản lý người dùng | — | — | — | ✓ |
 
 ---
 
-> **Phiên bản tài liệu:** 2026-06-03  
+> **Phiên bản tài liệu:** 2026-06-04  
 > **Hệ thống:** Laravel 11 / PHP 8.3 — FHIR R4 compatible
