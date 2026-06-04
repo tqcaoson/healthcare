@@ -30,12 +30,10 @@ export default () => ({
 
     // --- Lifecycle ---
     async init() {
-        const el = this.$el;
-        const eid = parseInt(el.dataset.encounterId);
-        const pid = parseInt(el.dataset.patientId);
+        const eid = parseInt(this.$el.dataset.encounterId) || null;
+        const pid = parseInt(this.$el.dataset.patientId) || null;
         if (eid) this.encounterId = eid;
         if (pid) this.patientId = pid;
-
         if (this.encounterId) await this.loadSchedule();
 
         window.addEventListener('patient-scan-internal', async (e) => {
