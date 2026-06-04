@@ -18,6 +18,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('medications', [\App\Http\Controllers\Web\MedicationController::class, 'store'])->name('medications.store');
     Route::get('medications/{id}', [\App\Http\Controllers\Web\MedicationController::class, 'show'])->name('medications.show');
 
+    Route::get('pharmacy/medication-scan', [\App\Http\Controllers\Web\PharmacyController::class, 'medicationScan'])
+        ->name('pharmacy.medication-scan');
+
     Route::get('reports', [\App\Http\Controllers\Web\ReportController::class, 'index'])->name('reports.index');
 
     Route::prefix('admin')->name('admin.')->group(function () {

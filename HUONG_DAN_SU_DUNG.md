@@ -253,10 +253,11 @@ Xem lịch sử phát thuốc (MAR — Medication Administration Record): ai ph�
 
 ## 8. Phát thuốc tại giường — MAR Scan
 
-**URL giao diện:** `/pharmacy/medication-scan?encounter_id={id}`
+**URL giao diện:** `/pharmacy/medication-scan` → chọn bệnh nhân  
+**URL trực tiếp:** `/pharmacy/medication-scan?encounter_id={id}` → vào thẳng lần khám
 
 > **Quyền truy cập:** Điều dưỡng (`nurse`), Bác sĩ (`physician`), Quản trị (`superadmin`).  
-> Dược sĩ chỉ xem MAR, không ghi nhận phát thuốc trực tiếp tại giường.
+> Dược sĩ chỉ verify order, không ghi nhận phát thuốc tại giường.
 
 Tính năng áp dụng **5 Rights** (đúng bệnh nhân · đúng thuốc · đúng liều · đúng đường dùng · đúng giờ) thông qua quét barcode bằng camera thiết bị.
 

@@ -30,13 +30,14 @@ export default () => ({
 
     // --- Lifecycle ---
     async init() {
-        // Read encounter_id from URL query param if present
-        const params = new URLSearchParams(window.location.search);
-        const enc = params.get('encounter_id');
-        if (enc) {
-            this.encounterId = parseInt(enc, 10);
-            await this.loadSchedule();
-        }
+        // encounterId & patientId are pre-set by x-init in the blade template.
+        // Listen for barcode events emitted by manual input / camera component.
+        window.addEventListener('patient-scan-internal', async (e) => {
+            await this.onPatientScan(e.detail.barcode);
+        });
+        window.addEventListener('medication-scan-internal', async (e) => {
+            await this.onMedicationScan(e.detail.barcode);
+        });
     },
 
     // --- MAR Schedule ---
